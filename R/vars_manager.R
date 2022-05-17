@@ -1,5 +1,3 @@
-library('rjson')
-
 KB <- 1024
 MB <- KB ** 2  # 1,048,576
 GB <- KB ** 3  # 1,073,741,824
@@ -73,7 +71,7 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(object.size(obj)))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
-    obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len)/dims[[2]],], obj)
+    obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len/dims[[2]]),], obj)
     data <- list()
     for (i in 1:nrow(obj_pre)) {
         data[[i]] = as.list(as.character(obj_pre[i,]))
@@ -100,8 +98,8 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
 get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(object.size(obj)))
-    abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
-    obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len)/dims[[2]],], obj)
+    abbrev <- !is.null(abbrev_len) && ncol(obj)*nrow(obj) > abbrev_len
+    obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len/dims[[2]]),], obj)
     data <- list()
     if (length(obj) > 0) {
         for (i in 1:nrow(obj_pre)) {
@@ -170,15 +168,42 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     ))
 }
 
-format_vars <- function(ls_output, abbrev_len=DEFAULT_ABBREV_LEN) {
+create_exception_var <- function(e) {
+    stack <- sys.calls()
+    row_names <- list()
+    i <- 1
+    for (row_name in `if`(is.null(names(stack)), 1:length(stack), names(stack))) {
+        row_names[i] = as.character(row_name)
+        i <- i + 1
+    }
+    return(
+        list(
+            name="Introspection Error",
+            type=toString(class(e)),
+            summary=toString(e),
+            abbreviated=FALSE,
+            value=list(
+                multi_value=list(
+                    column_count=1,
+                    row_count=length(stack),
+                    column_names=list("Traceback"),
+                    row_names=row_names,
+                    data=as.list(as.character(stack))
+                )
+            )
+        )
+    )
+}
+
+format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
     # Get string containing json representation of currently defined vars
-    # (pass the output of `ls()` to this function)
+    # (pass the output of `environment()` to this function)
     current_vars <- list()
 
-    # tryCatch({
+    err_resp <- tryCatch({
         idx <- 1
-        for (name in ls_output) {
-            obj <- get(name)
+        for (name in ls(envir)) {
+            obj <- get(name, envir=envir)
             if (startsWith(name, "__")) {
                 next
             }
@@ -192,10 +217,20 @@ format_vars <- function(ls_output, abbrev_len=DEFAULT_ABBREV_LEN) {
             current_vars[[idx]] <- var_details
             idx <- idx + 1
         }
-    # }, error=function(e) {
-    #     # current_vars = list(create_exception_var(e))
-    #     noquote(e)
-    # })
-    # return(current_vars)
-    return(rjson::toJSON(current_vars))
+    }, error=function(e) {
+        return(list(create_exception_var(e)))
+    })
+    return(rjson::toJSON(`if`(is.null(err_resp), current_vars, err_resp)))
+}
+
+format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN) {
+    # Get string containing json representation of a var
+    var_details <- NULL
+    err_resp <- tryCatch({
+        obj <- get(name, envir=envir)
+        var_details <- get_var_details(obj, name, abbrev_len)
+    }, error=function(e) {
+        return(create_exception_var(e))
+    })
+    return(rjson::toJSON(`if`(is.null(err_resp), var_details, err_resp)))
 }
