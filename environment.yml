@@ -1,0 +1,6 @@
+name: callisto_r
+channels:
+  - conda-forge
+dependencies:
+  - r=3.6.0
+  - r-rjson=0.2.20
