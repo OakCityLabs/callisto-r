@@ -297,3 +297,17 @@ test_that("format_var data.frame long but not abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:150))
     expect_equal(length(parsed_var$value$multi_value$data), 150)
 })
+
+test_that("format_var error", {
+    vars <- format_var(environment(), "fakevar", NULL)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "Introspection Error")
+    expect_equal(parsed_var$type, "simpleError, error, condition")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$summary, "Error in get(name, envir = envir): object 'fakevar' not found\n")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count > 1, TRUE)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Traceback"))
+    expect_equal(length(parsed_var$value$multi_value$row_names) > 1, TRUE)
+    expect_equal(length(parsed_var$value$multi_value$data) > 1, TRUE)
+})
