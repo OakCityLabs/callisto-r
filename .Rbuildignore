@@ -1,0 +1,6 @@
+^LICENSE\.md$
+^Makefile$
+^environment\.yml$
+^CRAN-SUBMISSION$
+^cran-comments\.md$
+^\.github$
