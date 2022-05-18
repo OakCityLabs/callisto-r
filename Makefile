@@ -22,8 +22,11 @@ load_env:
 	@echo Activate the new environment with
 	@echo "  " conda activate $(ENVNAME)
 
-test:
-	PYTHONPATH=. bash scripts/test.sh $(TEST_ARGS)
+check:
+	R CMD check
 
-single_test:
-	PYTHONPATH=. bash scripts/test.sh tests/$(test_name) $(TEST_ARGS)
+build:
+	R CMD BUILD . && R CMD CHECK `ls -t . | head -n1`
+
+test:
+	R -e "devtools::test()"

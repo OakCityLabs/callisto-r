@@ -69,7 +69,7 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
 
 get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     dims <- dim(obj)
-    summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(object.size(obj)))
+    summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
     obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len/dims[[2]]),], obj)
     data <- list()
@@ -97,7 +97,7 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
 
 get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     dims <- dim(obj)
-    summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(object.size(obj)))
+    summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && ncol(obj)*nrow(obj) > abbrev_len
     obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len/dims[[2]]),], obj)
     data <- list()
@@ -139,7 +139,7 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     intrinsic_types = c("character", "numeric", "integer", "logical", "complex", "raw")
 
     # vectors
-    if (obj_class %in% intrinsic_types) {
+    if (length(obj_class) == 1 && obj_class %in% intrinsic_types) {
         if (length(obj) == 1) {
             var_info <- get_single_vector_var(obj, name)
         } else {
@@ -161,7 +161,7 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
 
     return(list(
         name=name,
-        type=obj_class,
+        type=toString(obj_class),
         abbreviated=var_info[["abbrev"]],
         summary=substr(var_info[["summary"]], 1, 140),  # limit summary length
         value=var_info[["value"]]
@@ -195,6 +195,16 @@ create_exception_var <- function(e) {
     )
 }
 
+#' Get string containing json representation of defined vars in the provided environment
+#'
+#' @param envir An environment 
+#' @param abbrev_len The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.
+#'
+#' @return A string with a json list of vars.
+#' @export
+#'
+#' @examples
+#' vars_json <- format_vars(environment())
 format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
     # Get string containing json representation of currently defined vars
     # (pass the output of `environment()` to this function)
@@ -209,7 +219,7 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
             }
             obj_type <- typeof(obj)
             obj_class <- class(obj)
-            if (obj_type == "closure" || obj_class == "function") {
+            if (grepl("closure", toString(obj_type)) || grepl("closure", toString(obj_class)) ) {
                 next
             }
             var_details <- get_var_details(obj, name, abbrev_len)
@@ -223,8 +233,19 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
     return(rjson::toJSON(`if`(is.null(err_resp), current_vars, err_resp)))
 }
 
+#' Get string containing json representation of a single var in the provided environment
+#'
+#' @param envir An environment 
+#' @param name Name of a variable in the environment
+#' @param abbrev_len The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.
+#'
+#' @return A string with a json representation of a var.
+#' @export
+#'
+#' @examples
+#' x <- c(5,6)
+#' vars_json <- format_var(environment(), "x", NULL)
 format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN) {
-    # Get string containing json representation of a var
     var_details <- NULL
     err_resp <- tryCatch({
         obj <- get(name, envir=envir)

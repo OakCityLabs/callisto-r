@@ -1,1 +1,2 @@
-# callisto-r
+# callistor
+Provides functions for an R jupyter kernel running on a Callisto Jupyter D1 server to communicate with the D1 server via json. For example, callistor provides methods to get json representations of variables defined in the kernel
