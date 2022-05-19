@@ -317,15 +317,23 @@ test_that("format_var data.frame long but not abbreviated", {
 })
 
 test_that("format_var error", {
-    vars <- format_var(environment(), "fakevar", NULL)
-    parsed_var = rjson::fromJSON(vars)
-    expect_equal(parsed_var$name, "Introspection Error")
-    expect_equal(parsed_var$type, "simpleError, error, condition")
-    expect_equal(parsed_var$abbreviated, FALSE)
-    expect_equal(parsed_var$summary, "Error in get(name, envir = envir): object 'fakevar' not found\n")
-    expect_equal(parsed_var$value$multi_value$column_count, 1)
-    expect_equal(parsed_var$value$multi_value$row_count > 1, TRUE)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Traceback"))
-    expect_equal(length(parsed_var$value$multi_value$row_names) > 1, TRUE)
-    expect_equal(length(parsed_var$value$multi_value$data) > 1, TRUE)
+    expect_error(format_var(environment(), "fakevar", NULL), "object 'fakevar' not found")
+})
+
+test_that("create_exception_var returns formatted error", {
+    err_resp <- tryCatch({
+        stop("something exploded")
+    }, error=function(e) {
+        return(e)
+    })
+    error_var = create_exception_var(err_resp)
+    expect_equal(error_var$name, "Introspection Error")
+    expect_equal(error_var$type, "simpleError, error, condition")
+    expect_equal(error_var$abbreviated, FALSE)
+    expect_equal(error_var$summary, "Error in doTryCatch(return(expr), name, parentenv, handler): something exploded\n")
+    expect_equal(error_var$value$multi_value$column_count, 1)
+    expect_equal(error_var$value$multi_value$row_count > 1, TRUE)
+    expect_equal(error_var$value$multi_value$column_names, list("Traceback"))
+    expect_equal(length(error_var$value$multi_value$row_names) > 1, TRUE)
+    expect_equal(length(error_var$value$multi_value$data) > 1, TRUE)
 })

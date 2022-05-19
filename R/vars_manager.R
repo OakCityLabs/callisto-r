@@ -253,8 +253,8 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 #' vars_json <- format_var(environment(), "x", NULL)
 format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     var_details <- NULL
+    obj <- get(name, envir=envir)
     err_resp <- tryCatch({
-        obj <- get(name, envir=envir)
         var_details <- get_var_details(obj, name, abbrev_len)
     }, error=function(e) {
         return(create_exception_var(e))
