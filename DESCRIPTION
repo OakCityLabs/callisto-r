@@ -1,11 +1,14 @@
 Package: callistor
 Title: Callisto R Kernel Library
 Version: 0.0.1
-Authors@R:
-    person(given = "Callisto",
-           family = "Oak City",
+Authors@R: c(
+    person(given = "Taylor",
+           family = "Harrison",
            role = c("aut", "cre"),
-           email = "admin@oakcity.io")
+           email = "taylor@oakcity.io"),
+    person(given = "Callisto LLC",
+           role = c("cph"),
+           email = "admin@oakcity.io"))
 Description: Provides methods to serialize R variables to JSON for consumption by the Callisto JupyterD1 server.
 License: MIT + file LICENSE
 Encoding: UTF-8
