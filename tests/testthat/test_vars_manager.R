@@ -207,7 +207,7 @@ test_that("format_vars matrix abbreviated", {
 })
 
 test_that("format_vars data.frame abbreviated", {
-    dataframe1 <- read.csv("iris.csv")
+    dataframe1 <- read.csv("iris.csv", colClasses=c("numeric", "numeric", "numeric", "numeric", "factor"))
     vars <- format_vars(environment(), 33)
     parsed_vars = rjson::fromJSON(vars)
     expect_equal(length(parsed_vars), 1)
@@ -217,7 +217,16 @@ test_that("format_vars data.frame abbreviated", {
     expect_equal(startsWith(parsed_vars[[1]]$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 5)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 150)
-    expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("sepallength", "sepalwidth", "petallength", "petalwidth", "class"))
+    expect_equal(
+        parsed_vars[[1]]$value$multi_value$column_names, 
+        c(
+            "sepallength (numeric)",
+            "sepalwidth (numeric)",
+            "petallength (numeric)",
+            "petalwidth (numeric)",
+            "class (factor)"
+        )
+    )
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:7))
     expect_equal(length(parsed_vars[[1]]$value$multi_value$data), 7)
 })
@@ -284,7 +293,7 @@ test_that("format_var matrix long but not abbreviated", {
 })
 
 test_that("format_var data.frame long but not abbreviated", {
-    dataframe1 <- read.csv("iris.csv")
+    dataframe1 <- read.csv("iris.csv", colClasses=c("numeric", "numeric", "numeric", "numeric", "character"))
     vars <- format_var(environment(), "dataframe1", NULL)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
@@ -293,7 +302,16 @@ test_that("format_var data.frame long but not abbreviated", {
     expect_equal(startsWith(parsed_var$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 5)
     expect_equal(parsed_var$value$multi_value$row_count, 150)
-    expect_equal(parsed_var$value$multi_value$column_names, c("sepallength", "sepalwidth", "petallength", "petalwidth", "class"))
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c(
+            "sepallength (numeric)",
+            "sepalwidth (numeric)",
+            "petallength (numeric)",
+            "petalwidth (numeric)",
+            "class (character)"
+        )
+    )
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:150))
     expect_equal(length(parsed_var$value$multi_value$data), 150)
 })

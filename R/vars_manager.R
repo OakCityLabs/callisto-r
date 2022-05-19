@@ -103,14 +103,20 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     data <- list()
     if (length(obj) > 0) {
         for (i in 1:nrow(obj_pre)) {
-            data[[i]] = as.list(as.character(obj_pre[i,]))
+            # If we use as.character on the whole row at once factors are represented as 
+            # numbers and not their text value, so we as.character each cell
+            data_row = list()
+            for (j in 1:ncol(obj_pre)) {
+                data_row[[j]] = as.character(obj_pre[i,j])
+            }
+            data[[i]] = data_row
         }
     }
     col_names <- list()
     if (ncol(obj_pre) > 0) {
         i <- 1
         for (col_name in `if`(length(names(obj_pre)) > 1, names(obj_pre), 1:ncol(obj_pre))) {
-            col_names[i] <- as.character(col_name)
+            col_names[i] <- sprintf("%s (%s)", as.character(col_name), toString(class(obj_pre[,i])))
             i <- i + 1
         }
     }
