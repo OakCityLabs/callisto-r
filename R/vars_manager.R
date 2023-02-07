@@ -49,10 +49,18 @@ get_single_vector_var <- function(obj, name) {
     ))
 }
 
-get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
+get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
     summary <- sprintf("Length: %d", length(obj))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
-    obj_pre <- `if`(abbrev, obj[1:abbrev_len], obj)
+
+    if (is.character(sort_by) && tolower(sort_by) == "value") {
+        decreasing <- !`if`(is.logical(ascending), ascending, TRUE)
+        obj_sorted <- sort(obj, decreasing=decreasing)
+        obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
+    } else {
+        obj_pre <- `if`(abbrev, obj[1:abbrev_len], obj)
+    }
+
     data <- as.character(obj_pre)
     row_names <- list()
     i <- 1
@@ -129,7 +137,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
     ))
 }
 
-get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
+get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
     # Get formatted info for a specific var. Pass abbrev_len=NULL
     # to get non-abbreviated variable info
     obj_type <- typeof(obj)
@@ -143,12 +151,12 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
         if (length(obj) == 1) {
             var_info <- get_single_vector_var(obj, name)
         } else {
-            var_info <- get_vector_var(obj, name, abbrev_len)
+            var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending)
         }
     } else if (is.data.frame(obj)) {
         var_info <- get_dataframe_var(obj, name, abbrev_len)
     } else if (is.list(obj)) {
-        var_info <- get_vector_var(obj, name, abbrev_len)
+        var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending)
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {
         var_info <- get_matrix_var(obj, name, abbrev_len)
     } else {
@@ -238,6 +246,8 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 #' @param envir An environment 
 #' @param name Name of a variable in the environment
 #' @param abbrev_len The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.
+#' @param sort_by A list of columns to sort
+#' @param ascending A list of booleans for each 'sort_by' value, which determines whether to sort ascending or descending.
 #'
 #' @return A string with a json representation of a var.
 #' @export
@@ -245,11 +255,11 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 #' @examples
 #' x <- c(5,6)
 #' vars_json <- format_var(environment(), "x", NULL)
-format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN) {
+format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
     var_details <- NULL
     err_resp <- tryCatch({
         obj <- get(name, envir=envir)
-        var_details <- get_var_details(obj, name, abbrev_len)
+        var_details <- get_var_details(obj, name, abbrev_len, sort_by, ascending)
     }, error=function(e) {
         return(create_exception_var(e))
     })
