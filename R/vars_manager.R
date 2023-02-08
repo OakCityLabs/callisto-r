@@ -106,7 +106,7 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
 get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
-    abbrev <- !is.null(abbrev_len) && ncol(obj)*nrow(obj) > abbrev_len
+    abbrev <- !is.null(abbrev_len) && nrow(obj) > abbrev_len
 
     if (is.vector(sort_by) && length(sort_by) > 0) {
 
@@ -126,7 +126,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
         obj_sorted <- obj[do.call(order, order_params),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else {
-        obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len/dims[[2]]),], obj)
+        obj_pre <- `if`(abbrev, obj[1:abbrev_len,], obj)
     }
 
     data <- list()
