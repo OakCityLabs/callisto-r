@@ -75,11 +75,35 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
     ))
 }
 
-get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN) {
+get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
-    obj_pre <- `if`(abbrev, obj[1:ceiling(abbrev_len/dims[[2]]),], obj)
+
+    if (is.vector(sort_by) && length(sort_by) > 0) {
+        cols <- obj[,sort_by]
+        order_params <- as.list(as.data.frame(cols))
+
+        if (is.vector(ascending) && length(ascending) == length(sort_by)) {
+            i <- 0
+            for (col in order_params) {
+                i<-i+1
+                order_params[[i]] <- `if`(ascending[[i]], order_params[[i]], order_params[[i]]*-1)
+            }
+        } else if (is.logical(ascending) && ascending == FALSE) {
+            i <- 0
+            for (col in order_params) {
+                i <- i+1
+                order_params[[i]] <- order_params[[i]]*-1
+            }
+        }
+        
+        obj_sorted <- obj[do.call(order, order_params),]
+        obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
+    } else {
+        obj_pre <- `if`(abbrev, obj[1:abbrev_len,], obj)
+    }
+
     data <- list()
     for (i in 1:nrow(obj_pre)) {
         data[[i]] = as.list(as.character(obj_pre[i,]))
@@ -111,6 +135,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
     if (is.vector(sort_by) && length(sort_by) > 0) {
 
         order_params <- obj[match(sort_by, names(obj))]
+        
 
         if (is.vector(ascending) && length(ascending) == length(sort_by)) {
             i <- 0
@@ -118,8 +143,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
                 i<-i+1
                 order_params[i] <- `if`(ascending[i], order_params[i], order_params[i]*-1)
             }
-        }
-        if (is.logical(ascending) && ascending == FALSE) {
+        } else if (is.logical(ascending) && ascending == FALSE) {
             order_params <- order_params * -1
         }
 
@@ -179,7 +203,7 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NU
     } else if (is.list(obj)) {
         var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending)
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {
-        var_info <- get_matrix_var(obj, name, abbrev_len)
+        var_info <- get_matrix_var(obj, name, abbrev_len, sort_by, ascending)
     } else {
         var_info = list(
             abbrev=FALSE,
