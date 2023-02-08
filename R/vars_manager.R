@@ -97,7 +97,7 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
                 order_params[[i]] <- order_params[[i]]*-1
             }
         }
-        
+
         obj_sorted <- obj[do.call(order, order_params),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else {
@@ -132,10 +132,12 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && nrow(obj) > abbrev_len
 
-    if (is.vector(sort_by) && length(sort_by) > 0) {
-
+    if (is.character(sort_by) && tolower(sort_by) == "index") {
+        descending <- `if`(is.logical(ascending), !ascending, FALSE)
+        obj_sorted <- obj[order(as.numeric(rownames(obj)), decreasing=descending),]
+        obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
+    } else if (is.vector(sort_by) && length(sort_by) > 0) {
         order_params <- obj[match(sort_by, names(obj))]
-        
 
         if (is.vector(ascending) && length(ascending) == length(sort_by)) {
             i <- 0
@@ -291,8 +293,8 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 #' @param envir An environment 
 #' @param name Name of a variable in the environment
 #' @param abbrev_len The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.
-#' @param sort_by A list of columns to sort
-#' @param ascending A list of booleans for each 'sort_by' value, which determines whether to sort ascending or descending.
+#' @param sort_by A vector containing columns to sort (primary first)
+#' @param ascending A vector of booleans or a single boolean, depending on the data type
 #'
 #' @return A string with a json representation of a var.
 #' @export
