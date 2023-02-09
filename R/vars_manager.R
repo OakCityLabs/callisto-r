@@ -50,6 +50,8 @@ get_single_vector_var <- function(obj, name) {
 }
 
 get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+    # sort_by should be a single string, "value"
+    # ascending should be a single boolean
     summary <- sprintf("Length: %d", length(obj))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
 
@@ -76,6 +78,8 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
 }
 
 get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+    # sort_by should be a vector of column indexes
+    # ascending should be a vector of booleans, or a single boolean
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
@@ -128,6 +132,8 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
 }
 
 get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+    # sort_by should be a vector of column names, or a single string: "index"
+    # ascending should be a vector of booleans, or a single boolean
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && nrow(obj) > abbrev_len
