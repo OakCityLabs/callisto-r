@@ -207,7 +207,7 @@ test_that("format_vars matrix abbreviated", {
 })
 
 test_that("format_vars data.frame abbreviated", {
-    dataframe1 <- read.csv("iris.csv")
+    dataframe1 <- read.csv("iris.csv", colClasses=c("numeric", "numeric", "numeric", "numeric", "factor"))
     vars <- format_vars(environment(), 7)
     parsed_vars = rjson::fromJSON(vars)
     expect_equal(length(parsed_vars), 1)
@@ -217,7 +217,16 @@ test_that("format_vars data.frame abbreviated", {
     expect_equal(startsWith(parsed_vars[[1]]$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 5)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 150)
-    expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("sepallength", "sepalwidth", "petallength", "petalwidth", "class"))
+    expect_equal(
+        parsed_vars[[1]]$value$multi_value$column_names, 
+        c(
+            "sepallength (numeric)",
+            "sepalwidth (numeric)",
+            "petallength (numeric)",
+            "petalwidth (numeric)",
+            "class (factor)"
+        )
+    )
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:7))
     expect_equal(length(parsed_vars[[1]]$value$multi_value$data), 7)
 })
@@ -411,7 +420,7 @@ test_that("format_var matrix sort by multiple columns with single ascending valu
 
 
 test_that("format_var data.frame long but not abbreviated", {
-    dataframe1 <- read.csv("iris.csv")
+    dataframe1 <- read.csv("iris.csv", colClasses=c("numeric", "numeric", "numeric", "numeric", "character"))
     vars <- format_var(environment(), "dataframe1", NULL)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
@@ -420,7 +429,16 @@ test_that("format_var data.frame long but not abbreviated", {
     expect_equal(startsWith(parsed_var$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 5)
     expect_equal(parsed_var$value$multi_value$row_count, 150)
-    expect_equal(parsed_var$value$multi_value$column_names, c("sepallength", "sepalwidth", "petallength", "petalwidth", "class"))
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c(
+            "sepallength (numeric)",
+            "sepalwidth (numeric)",
+            "petallength (numeric)",
+            "petalwidth (numeric)",
+            "class (character)"
+        )
+    )
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:150))
     expect_equal(length(parsed_var$value$multi_value$data), 150)
 })
@@ -435,7 +453,16 @@ test_that("format_var data.frame abbreviated", {
     expect_equal(startsWith(parsed_var$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 5)
     expect_equal(parsed_var$value$multi_value$row_count, 150)
-    expect_equal(parsed_var$value$multi_value$column_names, c("sepallength", "sepalwidth", "petallength", "petalwidth", "class"))
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c(
+            "sepallength (numeric)",
+            "sepalwidth (numeric)",
+            "petallength (numeric)",
+            "petalwidth (numeric)",
+            "class (character)"
+        )
+    )
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:5))
     expect_equal(length(parsed_var$value$multi_value$data), 5)
 })
@@ -454,7 +481,10 @@ test_that("format_var data.frame sorting by single column", {
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Name", "Age", "Employed"))
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c("Name (character)", "Age (numeric)", "Employed (logical)")
+    )
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "5", "3", "2", "4"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
@@ -477,7 +507,7 @@ test_that("format_var data.frame sorting by single column abbreviated", {
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Name", "Age", "Employed"))
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "5", "3"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
@@ -498,7 +528,7 @@ test_that("format_var data.frame sorting by multiple columns", {
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Name", "Age", "Employed"))
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("5", "2", "1", "3", "4"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "FALSE"))
@@ -521,7 +551,7 @@ test_that("format_var data.frame sorting by multiple columns, one descending", {
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Name", "Age", "Employed"))
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("2", "5", "4", "3", "1"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Bill", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
@@ -544,7 +574,7 @@ test_that("format_var data.frame sorting by multiple columns, both descending", 
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Name", "Age", "Employed"))
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("4", "3", "1", "2", "5"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Ben", "58", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Maria", "32", "TRUE"))
@@ -571,7 +601,7 @@ test_that("format_var data.frame sorting by index descending", {
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Name", "Age", "Employed"))
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("112", "10", "6", "5", "1"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Ben", "58", "TRUE"))
@@ -646,15 +676,23 @@ test_that("format_var vector sorting abbreviated", {
 })
 
 test_that("format_var error", {
-    vars <- format_var(environment(), "fakevar", NULL)
-    parsed_var = rjson::fromJSON(vars)
-    expect_equal(parsed_var$name, "Introspection Error")
-    expect_equal(parsed_var$type, "simpleError, error, condition")
-    expect_equal(parsed_var$abbreviated, FALSE)
-    expect_equal(parsed_var$summary, "Error in get(name, envir = envir): object 'fakevar' not found\n")
-    expect_equal(parsed_var$value$multi_value$column_count, 1)
-    expect_equal(parsed_var$value$multi_value$row_count > 1, TRUE)
-    expect_equal(parsed_var$value$multi_value$column_names, c("Traceback"))
-    expect_equal(length(parsed_var$value$multi_value$row_names) > 1, TRUE)
-    expect_equal(length(parsed_var$value$multi_value$data) > 1, TRUE)
+    expect_error(format_var(environment(), "fakevar", NULL), "object 'fakevar' not found")
+})
+
+test_that("create_exception_var returns formatted error", {
+    err_resp <- tryCatch({
+        stop("something exploded")
+    }, error=function(e) {
+        return(e)
+    })
+    error_var = create_exception_var(err_resp)
+    expect_equal(error_var$name, "Introspection Error")
+    expect_equal(error_var$type, "simpleError, error, condition")
+    expect_equal(error_var$abbreviated, FALSE)
+    expect_equal(error_var$summary, "Error in doTryCatch(return(expr), name, parentenv, handler): something exploded\n")
+    expect_equal(error_var$value$multi_value$column_count, 1)
+    expect_equal(error_var$value$multi_value$row_count > 1, TRUE)
+    expect_equal(error_var$value$multi_value$column_names, list("Traceback"))
+    expect_equal(length(error_var$value$multi_value$row_names) > 1, TRUE)
+    expect_equal(length(error_var$value$multi_value$data) > 1, TRUE)
 })

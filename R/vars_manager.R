@@ -164,14 +164,20 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
     data <- list()
     if (length(obj) > 0) {
         for (i in 1:nrow(obj_pre)) {
-            data[[i]] = as.list(as.character(obj_pre[i,]))
+            # If we use as.character on the whole row at once factors are represented as 
+            # numbers and not their text value, so we as.character each cell
+            data_row = list()
+            for (j in 1:ncol(obj_pre)) {
+                data_row[[j]] = as.character(obj_pre[i,j])
+            }
+            data[[i]] = data_row
         }
     }
     col_names <- list()
     if (ncol(obj_pre) > 0) {
         i <- 1
         for (col_name in `if`(length(names(obj_pre)) > 1, names(obj_pre), 1:ncol(obj_pre))) {
-            col_names[i] <- as.character(col_name)
+            col_names[i] <- sprintf("%s (%s)", as.character(col_name), toString(class(obj_pre[,i])))
             i <- i + 1
         }
     }
@@ -310,8 +316,8 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 #' vars_json <- format_var(environment(), "x", NULL)
 format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
     var_details <- NULL
+    obj <- get(name, envir=envir)
     err_resp <- tryCatch({
-        obj <- get(name, envir=envir)
         var_details <- get_var_details(obj, name, abbrev_len, sort_by, ascending)
     }, error=function(e) {
         return(create_exception_var(e))
