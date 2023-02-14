@@ -70,13 +70,14 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
                 search <- row1$search[1]
                 min <- row1$min[1]
                 max <- row1$max[1]
+                obj_numeric <- is.numeric(obj)
                 if (is.character(search)) {
-                    obj_filtered <- obj_filtered[grepl(search, obj, ignore.case=TRUE)]
+                    obj_filtered <- obj_filtered[grepl(search, obj_filtered, ignore.case=TRUE)]
                 }
-                if (is.numeric(min)) {
+                if (is.numeric(min) && obj_numeric) {
                     obj_filtered <- obj_filtered[obj_filtered >= min]
                 }
-                if (is.numeric(max)) {
+                if (is.numeric(max) && obj_numeric) {
                     obj_filtered <- obj_filtered[obj_filtered <= max]
                 }
             }
@@ -161,19 +162,57 @@ get_matrix_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
     ))
 }
 
-get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL, filters=NULL) {
     # sort_by should be a vector of column names, or a single string: "index"
     # ascending should be a vector of booleans, or a single boolean
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
-    abbrev <- !is.null(abbrev_len) && nrow(obj) > abbrev_len
+    
+    obj_filtered <- obj
+    if (is.data.frame(filters) && length(filters) > 0) {
+        col_names <- colnames(filters)
+        if (
+            ("col" %in% col_names) &&
+            ("search" %in% col_names) &&
+            ("min" %in% col_names) &&
+            ("max" %in% col_names)
+        ) {
+            obj_cols <- colnames(obj_filtered)
+
+            for (row in 1:nrow(filters)) {
+                col_name <- filters[row, "col"]
+                col_numeric <- is.numeric(obj_filtered[,col_name])
+
+                if (is.character(col_name) && col_name %in% obj_cols) {
+                    search <- filters[row, "search"]
+                    min <- filters[row, "min"]
+                    max <- filters[row, "max"]
+                    
+                    if (is.character(search)) {
+                        obj_filtered <- obj_filtered[grepl(search, obj_filtered[,col_name], ignore.case=TRUE),]
+                    }
+                    if (is.numeric(min) && col_numeric) {
+                        obj_filtered <- obj_filtered[obj_filtered[,col_name] >= min,]
+                    }
+                    if (is.numeric(max) && col_numeric) {
+                        obj_filtered <- obj_filtered[obj_filtered[,col_name] <= max,]
+                    }
+                }
+            }
+
+            
+        }
+    }
+    
+    abbrev <- !is.null(abbrev_len) && nrow(obj_filtered) > abbrev_len
+    dims <- dim(obj_filtered)
 
     if (is.character(sort_by) && tolower(sort_by) == "index") {
         descending <- `if`(is.logical(ascending), !ascending, FALSE)
-        obj_sorted <- obj[order(attr(obj, "row.names"), decreasing=descending),]
+        obj_sorted <- obj_filtered[order(attr(obj_filtered, "row.names"), decreasing=descending),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else if (is.vector(sort_by) && length(sort_by) > 0) {
-        order_params <- obj[match(sort_by, names(obj))]
+        order_params <- obj_filtered[match(sort_by, names(obj_filtered))]
 
         if (is.vector(ascending) && length(ascending) == length(sort_by)) {
             i <- 0
@@ -185,14 +224,14 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
             order_params <- order_params * -1
         }
 
-        obj_sorted <- obj[do.call(order, order_params),]
+        obj_sorted <- obj_filtered[do.call(order, order_params),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else {
-        obj_pre <- `if`(abbrev, obj[1:abbrev_len,], obj)
+        obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len,], obj_filtered)
     }
 
     data <- list()
-    if (length(obj) > 0) {
+    if (length(obj_pre) > 0) {
         for (i in 1:nrow(obj_pre)) {
             # If we use as.character on the whole row at once factors are represented as 
             # numbers and not their text value, so we as.character each cell
@@ -243,7 +282,7 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NU
             var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending, filters)
         }
     } else if (is.data.frame(obj)) {
-        var_info <- get_dataframe_var(obj, name, abbrev_len, sort_by, ascending)
+        var_info <- get_dataframe_var(obj, name, abbrev_len, sort_by, ascending, filters)
     } else if (is.list(obj)) {
         var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending, filters)
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {

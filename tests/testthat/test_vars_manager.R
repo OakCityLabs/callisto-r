@@ -634,6 +634,123 @@ test_that("format_var data.frame sorting by string index descending", {
     expect_equal(parsed_var$value$multi_value$data[[5]], c("Jon", "23", "TRUE"))
 })
 
+test_that("format_var data.frame filtering search", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Billy J", "Maria", "Jen", "Tina"),
+        Age = c(23, 41, 32, 58, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+
+    filters <- data.frame(
+        col = c("Name"),
+        search = c("j"),
+        min = c(NA),
+        max = c(NA)
+    )
+
+    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 3)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "4"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Billy J", "41", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("Jen", "58", "TRUE"))
+})
+
+test_that("format_var data.frame filtering search multiple columns", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Billy J", "Maria", "Jen", "Tina"),
+        Age = c(23, 41, 416, 4136, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+
+    filters <- data.frame(
+        col = c("Name", "Age"),
+        search = c("j", "41"),
+        min = c(NA, NA),
+        max = c(NA, NA)
+    )
+
+    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 2)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("2", "4"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Billy J", "41", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Jen", "4136", "TRUE"))
+})
+
+test_that("format_var data.frame filtering min/max numeric", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Billy J", "Maria", "Jen", "Tina"),
+        Age = c(23, 41, 416, 4136, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+
+    filters <- data.frame(
+        col = c("Age"),
+        search = c(NA),
+        min = c(26),
+        max = c(416)
+    )
+
+    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 3)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("2", "3", "5"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Billy J", "41", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Maria", "416", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("Tina", "26", "FALSE"))
+})
+
+test_that("format_var data.frame filtering min/max characters", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Billy J", "Maria", "Jen", "Tina"),
+        Age = c(23, 41, 416, 4136, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+
+    filters <- data.frame(
+        col = c("Name"),
+        search = c(NA),
+        min = c(26),
+        max = c(416)
+    )
+
+    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 5)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "3", "4", "5"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Billy J", "41", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("Maria", "416", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[4]], c("Jen", "4136", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[5]], c("Tina", "26", "FALSE"))
+})
+
 
 test_that("format_var vector multi element", {
     vector1 <- c(2, 3, 5, 1, 6, 7)
@@ -743,6 +860,52 @@ test_that("format_var vector search numeric abbreviated", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2"))
     expect_equal(parsed_var$value$multi_value$data, c("101", "100"))
+})
+
+test_that("format_var vector min/max numeric", {
+    vector1 <- c(10, 3, 100, 101, 34, 3501)
+
+    filters <- data.frame(
+        col = c("value"),
+        search = c(NA),
+        min = c(34),
+        max = c(3000)
+    )
+
+    vars <- format_var(environment(), "vector1", 2, "value", NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "vector1")
+    expect_equal(parsed_var$type, "numeric")
+    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$summary, "Length: 6")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 3)
+    expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("1", "2"))
+    expect_equal(parsed_var$value$multi_value$data, c("34", "100"))
+})
+
+test_that("format_var vector min/max characters", {
+    vector1 <- c("cc", "Bird", "abiRda", "Z", "100bird", "11")
+
+    filters <- data.frame(
+        col = c("value"),
+        search = c(NA),
+        min = c(3),
+        max = c("100")
+    )
+
+    vars <- format_var(environment(), "vector1", 10, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "vector1")
+    expect_equal(parsed_var$type, "character")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$summary, "Length: 6")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 6)
+    expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "3", "4", "5", "6"))
+    expect_equal(parsed_var$value$multi_value$data, c("cc", "Bird", "abiRda", "Z", "100bird", "11"))
 })
 
 
