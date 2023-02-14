@@ -24,3 +24,6 @@ build:
 
 test:
 	R -e "devtools::test()"
+
+make_docs:
+	Rscript -e "roxygen2::roxygenise()"

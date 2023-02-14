@@ -140,7 +140,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
 
     if (is.character(sort_by) && tolower(sort_by) == "index") {
         descending <- `if`(is.logical(ascending), !ascending, FALSE)
-        obj_sorted <- obj[order(as.numeric(rownames(obj)), decreasing=descending),]
+        obj_sorted <- obj[order(attr(obj, "row.names"), decreasing=descending),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else if (is.vector(sort_by) && length(sort_by) > 0) {
         order_params <- obj[match(sort_by, names(obj))]
