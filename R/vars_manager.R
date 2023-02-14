@@ -49,18 +49,48 @@ get_single_vector_var <- function(obj, name) {
     ))
 }
 
-get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL, filters=NULL) {
     # sort_by should be a single string, "value"
     # ascending should be a single boolean
     summary <- sprintf("Length: %d", length(obj))
-    abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
+
+    obj_filtered <- obj
+    if (is.data.frame(filters) && length(filters) > 0) {
+        col_names <- colnames(filters)
+        if (
+            ("col" %in% col_names) &&
+            ("search" %in% col_names) &&
+            ("min" %in% col_names) &&
+            ("max" %in% col_names)
+        ) {
+            row1 <- filters[1,]
+            col_name <- row1$col[1]
+
+            if (is.character(col_name) && tolower(col_name) == "value") {
+                search <- row1$search[1]
+                min <- row1$min[1]
+                max <- row1$max[1]
+                if (is.character(search)) {
+                    obj_filtered <- obj_filtered[grepl(search, obj, ignore.case=TRUE)]
+                }
+                if (is.numeric(min)) {
+                    obj_filtered <- obj_filtered[obj_filtered >= min]
+                }
+                if (is.numeric(max)) {
+                    obj_filtered <- obj_filtered[obj_filtered <= max]
+                }
+            }
+        }
+    }
+
+    abbrev <- !is.null(abbrev_len) && length(obj_filtered) > abbrev_len
 
     if (is.character(sort_by) && tolower(sort_by) == "value") {
         decreasing <- !`if`(is.logical(ascending), ascending, TRUE)
-        obj_sorted <- sort(obj, decreasing=decreasing)
+        obj_sorted <- sort(obj_filtered, decreasing=decreasing)
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
     } else {
-        obj_pre <- `if`(abbrev, obj[1:abbrev_len], obj)
+        obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len], obj_filtered)
     }
 
     data <- as.character(obj_pre)
@@ -73,7 +103,7 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
     return(list(
         summary=summary,
         abbrev=abbrev,
-        value=make_multi_dict(row_names, name, data, total_row_count=length(obj))
+        value=make_multi_dict(row_names, name, data, total_row_count=length(obj_filtered))
     ))
 }
 
@@ -196,7 +226,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
     ))
 }
 
-get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL, filters=NULL) {
     # Get formatted info for a specific var. Pass abbrev_len=NULL
     # to get non-abbreviated variable info
     obj_type <- typeof(obj)
@@ -210,12 +240,12 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NU
         if (length(obj) == 1) {
             var_info <- get_single_vector_var(obj, name)
         } else {
-            var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending)
+            var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending, filters)
         }
     } else if (is.data.frame(obj)) {
         var_info <- get_dataframe_var(obj, name, abbrev_len, sort_by, ascending)
     } else if (is.list(obj)) {
-        var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending)
+        var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending, filters)
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {
         var_info <- get_matrix_var(obj, name, abbrev_len, sort_by, ascending)
     } else {
@@ -314,11 +344,11 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 #' @examples
 #' x <- c(5,6)
 #' vars_json <- format_var(environment(), "x", NULL)
-format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL) {
+format_var <- function(envir, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL, filters=NULL) {
     var_details <- NULL
     obj <- get(name, envir=envir)
     err_resp <- tryCatch({
-        var_details <- get_var_details(obj, name, abbrev_len, sort_by, ascending)
+        var_details <- get_var_details(obj, name, abbrev_len, sort_by, ascending, filters)
     }, error=function(e) {
         return(create_exception_var(e))
     })

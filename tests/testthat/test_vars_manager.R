@@ -699,6 +699,53 @@ test_that("format_var vector sorting abbreviated", {
     expect_equal(parsed_var$value$multi_value$data, c("100", "11", "A", "aa"))
 })
 
+test_that("format_var vector search characters", {
+    vector1 <- c("cc", "Bird", "abiRda", "Z", "100bird", "11")
+
+    filters <- data.frame(
+        col = c("value"),
+        search = c("bird"),
+        min = c(NA),
+        max = c(NA)
+    )
+
+    vars <- format_var(environment(), "vector1", 4, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "vector1")
+    expect_equal(parsed_var$type, "character")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$summary, "Length: 6")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 3)
+    expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "3"))
+    expect_equal(parsed_var$value$multi_value$data, c("Bird", "abiRda", "100bird"))
+})
+
+test_that("format_var vector search numeric abbreviated", {
+    vector1 <- c(10, 3, 100, 101, 34, 3501)
+
+    filters <- data.frame(
+        col = c("value"),
+        search = c("10"),
+        min = c(NA),
+        max = c(NA)
+    )
+
+    vars <- format_var(environment(), "vector1", 2, "value", FALSE, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "vector1")
+    expect_equal(parsed_var$type, "numeric")
+    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$summary, "Length: 6")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 3)
+    expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("1", "2"))
+    expect_equal(parsed_var$value$multi_value$data, c("101", "100"))
+})
+
+
 test_that("format_var error", {
     expect_error(format_var(environment(), "fakevar", NULL), "object 'fakevar' not found")
 })
