@@ -9,7 +9,8 @@ format_var(
   name,
   abbrev_len = DEFAULT_ABBREV_LEN,
   sort_by = NULL,
-  ascending = NULL
+  ascending = NULL,
+  filters = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ format_var(
 \item{sort_by}{A vector containing columns to sort (primary first)}
 
 \item{ascending}{A vector of booleans or a single boolean, depending on the data type}
+
+\item{filters}{A data.frame with a row for each column to filter. Columns must be: "col", "search", "min", "max"}
 }
 \value{
 A string with a json representation of a var.

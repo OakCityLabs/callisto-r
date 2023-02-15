@@ -418,6 +418,125 @@ test_that("format_var matrix sort by multiple columns with single ascending valu
     expect_equal(parsed_var$value$multi_value$data[[6]], c("9", "3"))
 })
 
+test_that("format_var matrix sort with characters", {
+    matrix1 <- matrix(c("hello","hi","ab","a","A","BC","Z","cool"), ncol=2)
+
+    vars <- format_var(environment(), "matrix1", NULL, c(1))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 4x2 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 2)
+    expect_equal(parsed_var$value$multi_value$row_count, 4)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:4))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("a", "cool"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("ab", "Z"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("hello", "A"))
+    expect_equal(parsed_var$value$multi_value$data[[4]], c("hi", "BC"))
+})
+
+
+test_that("format_var matrix filtering search", {
+    matrix1 <- matrix(c("hello","hi","ab","a","A","BC","Z","cool"), ncol=2)
+
+    filters <- data.frame(
+        col = c(1),
+        search = c("h"),
+        min = c(NA),
+        max = c(NA)
+    )
+
+    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 4x2 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 2)
+    expect_equal(parsed_var$value$multi_value$row_count, 2)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("hello", "A"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("hi", "BC"))
+})
+
+test_that("format_var matrix filtering min/max characters", {
+    matrix1 <- matrix(c("hello","hi","ab","a","A","BC","Z","cool"), ncol=2)
+
+    filters <- data.frame(
+        col = c(1),
+        search = c(NA),
+        min = c(4),
+        max = c("B")
+    )
+
+    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 4x2 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 2)
+    expect_equal(parsed_var$value$multi_value$row_count, 4)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:4))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("hello", "A"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("hi", "BC"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("ab", "Z"))
+    expect_equal(parsed_var$value$multi_value$data[[4]], c("a", "cool"))
+})
+
+test_that("format_var matrix filtering min/max numeric", {
+    matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
+
+    filters <- data.frame(
+        col = c(2),
+        search = c(NA),
+        min = c(4),
+        max = c(10.0)
+    )
+
+    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 2)
+    expect_equal(parsed_var$value$multi_value$row_count, 3)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:3))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("4", "10"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("2", "4"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("7", "6"))
+})
+
+test_that("format_var matrix filtering multiple columns", {
+    matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
+
+    filters <- data.frame(
+        col = c(2, 1),
+        search = c(NA, NA),
+        min = c(4, 4),
+        max = c(10.0, 9)
+    )
+
+    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 2)
+    expect_equal(parsed_var$value$multi_value$row_count, 2)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("4", "10"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("7", "6"))
+})
+
 
 test_that("format_var data.frame long but not abbreviated", {
     dataframe1 <- read.csv("iris.csv", colClasses=c("numeric", "numeric", "numeric", "numeric", "character"))
