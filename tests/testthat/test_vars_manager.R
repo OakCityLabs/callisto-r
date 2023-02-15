@@ -709,7 +709,7 @@ test_that("format_var data.frame sorting by index descending", {
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, "InDEx", FALSE)
+    vars <- format_var(environment(), "dataframe1", NULL, c("InDEx"), c(FALSE))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
@@ -905,7 +905,7 @@ test_that("format_var vector sorting integers", {
 
 test_that("format_var vector sorting strings", {
     vector1 <- c("cc", "A", "aa", "Z", "100", "11")
-    vars <- format_var(environment(), "vector1", NULL, "value")
+    vars <- format_var(environment(), "vector1", NULL, "value", TRUE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
@@ -921,7 +921,7 @@ test_that("format_var vector sorting strings", {
 
 test_that("format_var vector sorting abbreviated", {
     vector1 <- c("cc", "A", "aa", "Z", "100", "11")
-    vars <- format_var(environment(), "vector1", 4, "value")
+    vars <- format_var(environment(), "vector1", 4, c("value"))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
@@ -933,6 +933,22 @@ test_that("format_var vector sorting abbreviated", {
     row_names = as.character(1:4)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
     expect_equal(parsed_var$value$multi_value$data, c("100", "11", "A", "aa"))
+})
+
+test_that("format_var vector sorting integers descending", {
+    vector1 <- c(2, 3, 5, 1, 6, 7)
+    vars <- format_var(environment(), "vector1", NULL, "value", c(FALSE))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "vector1")
+    expect_equal(parsed_var$type, "numeric")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$summary, "Length: 6")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 6)
+    expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
+    row_names = as.character(1:6)
+    expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$data, c("7", "6", "5", "3", "2", "1"))
 })
 
 test_that("format_var vector search characters", {

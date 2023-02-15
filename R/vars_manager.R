@@ -57,8 +57,8 @@ get_vector_var <- function(
     ascending=NULL,
     filters=NULL
 ) {
-    # sort_by should be a single string, "value"
-    # ascending should be a single boolean
+    # sort_by should be a single string or a vector with a single string, "value"
+    # ascending should be a single boolean, or a vector with a single boolean
     summary <- sprintf("Length: %d", length(obj))
 
     obj_filtered <- obj
@@ -93,8 +93,21 @@ get_vector_var <- function(
 
     abbrev <- !is.null(abbrev_len) && length(obj_filtered) > abbrev_len
 
-    if (is.character(sort_by) && tolower(sort_by) == "value") {
-        decreasing <- !`if`(is.logical(ascending), ascending, TRUE)
+    if (
+        (is.character(sort_by) && tolower(sort_by) == "value") ||
+        (is.vector(sort_by) && length(sort_by) == 1 && tolower(sort_by[1]) == "value")
+    ) {
+        if (is.logical(ascending)) {
+            decreasing <- !ascending
+        } else if (
+            is.vector(ascending) &&
+            length(ascending) == 1 &&
+            is.logical(ascending[1])
+        ) {
+            decreasing <- !ascending[1]
+        } else {
+            decreasing <- FALSE
+        }
         obj_sorted <- sort(obj_filtered, decreasing=decreasing)
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
     } else {
@@ -223,7 +236,7 @@ get_dataframe_var <- function(
     ascending=NULL,
     filters=NULL
 ) {
-    # sort_by should be a vector of column names, or a single string: "index"
+    # sort_by should be a vector of column names ("index" to sort index; cannot be combined with other columns)
     # ascending should be a vector of booleans, or a single boolean
     dims <- dim(obj)
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
@@ -265,9 +278,21 @@ get_dataframe_var <- function(
     abbrev <- !is.null(abbrev_len) && nrow(obj_filtered) > abbrev_len
     dims <- dim(obj_filtered)
 
-    if (is.character(sort_by) && tolower(sort_by) == "index") {
-        descending <- `if`(is.logical(ascending), !ascending, FALSE)
-        obj_sorted <- obj_filtered[order(attr(obj_filtered, "row.names"), decreasing=descending),]
+
+    if (is.vector(sort_by) && length(sort_by) == 1 && tolower(sort_by[1]) == "index") {
+        if (is.logical(ascending)) {
+            decreasing <- !ascending
+        } else if (
+            is.vector(ascending) &&
+            length(ascending) == 1 &&
+            is.logical(ascending[1])
+        ) {
+            decreasing <- !ascending[1]
+        } else {
+            decreasing <- FALSE
+        }
+
+        obj_sorted <- obj_filtered[order(attr(obj_filtered, "row.names"), decreasing=decreasing),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else if (is.vector(sort_by) && length(sort_by) > 0) {
         order_params <- obj_filtered[match(sort_by, names(obj_filtered))]
