@@ -55,7 +55,7 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
     summary <- sprintf("Length: %d", length(obj))
     abbrev <- !is.null(abbrev_len) && length(obj) > abbrev_len
 
-    if (is.character(sort_by) && tolower(sort_by) == "value") {
+    if (is.character(sort_by) && length(sort_by) == 1 && tolower(sort_by) == "value") {
         decreasing <- !`if`(is.logical(ascending), ascending, TRUE)
         obj_sorted <- sort(obj, decreasing=decreasing, na.last=decreasing)
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
@@ -138,7 +138,7 @@ get_dataframe_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=
     summary <- sprintf("Size: %dx%d Memory: %s", dims[[1]], dims[[2]], human_bytes(utils::object.size(obj)))
     abbrev <- !is.null(abbrev_len) && nrow(obj) > abbrev_len
 
-    if (is.character(sort_by) && tolower(sort_by) == "index") {
+    if (is.character(sort_by) && length(sort_by) == 1 && tolower(sort_by) == "index") {
         descending <- `if`(is.logical(ascending), !ascending, FALSE)
         obj_sorted <- obj[order(attr(obj, "row.names"), decreasing=descending),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
