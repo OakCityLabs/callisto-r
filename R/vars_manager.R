@@ -57,7 +57,7 @@ get_vector_var <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NUL
 
     if (is.character(sort_by) && tolower(sort_by) == "value") {
         decreasing <- !`if`(is.logical(ascending), ascending, TRUE)
-        obj_sorted <- sort(obj, decreasing=decreasing)
+        obj_sorted <- sort(obj, decreasing=decreasing, na.last=TRUE)
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
     } else {
         obj_pre <- `if`(abbrev, obj[1:abbrev_len], obj)

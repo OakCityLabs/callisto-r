@@ -668,19 +668,19 @@ test_that("format_var vector sorting integers", {
 })
 
 test_that("format_var vector sorting strings", {
-    vector1 <- c("cc", "A", "aa", "Z", "100", "11")
+    vector1 <- c("cc", "A", "aa", NA, "Z", "100", "11", NA)
     vars <- format_var(environment(), "vector1", NULL, "value")
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
     expect_equal(parsed_var$abbreviated, FALSE)
-    expect_equal(parsed_var$summary, "Length: 6")
+    expect_equal(parsed_var$summary, "Length: 8")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
-    expect_equal(parsed_var$value$multi_value$row_count, 6)
+    expect_equal(parsed_var$value$multi_value$row_count, 8)
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
-    row_names = as.character(1:6)
+    row_names = as.character(1:8)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
-    expect_equal(parsed_var$value$multi_value$data, c("100", "11", "A", "aa", "cc", "Z"))
+    expect_equal(parsed_var$value$multi_value$data, c("100", "11", "A", "aa", "cc", "Z", "NA", "NA"))
 })
 
 test_that("format_var vector sorting abbreviated", {
