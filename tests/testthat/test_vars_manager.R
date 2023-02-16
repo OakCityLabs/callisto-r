@@ -680,7 +680,23 @@ test_that("format_var vector sorting strings", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:8)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
-    expect_equal(parsed_var$value$multi_value$data, c("100", "11", "A", "aa", "cc", "Z", "NA", "NA"))
+    expect_equal(parsed_var$value$multi_value$data, c("NA", "NA", "100", "11", "A", "aa", "cc", "Z"))
+})
+
+test_that("format_var vector sorting strings descending", {
+    vector1 <- c("cc", "A", "aa", NA, "Z", "100", "11", NA)
+    vars <- format_var(environment(), "vector1", NULL, "value", FALSE)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "vector1")
+    expect_equal(parsed_var$type, "character")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$summary, "Length: 8")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 8)
+    expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
+    row_names = as.character(1:8)
+    expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$data, c("Z", "cc", "aa", "A", "11", "100", "NA", "NA"))
 })
 
 test_that("format_var vector sorting abbreviated", {
