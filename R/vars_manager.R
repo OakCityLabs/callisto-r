@@ -94,21 +94,20 @@ get_vector_var <- function(
     abbrev <- !is.null(abbrev_len) && length(obj_filtered) > abbrev_len
 
     if (
-        (is.character(sort_by) && tolower(sort_by) == "value") ||
-        (is.vector(sort_by) && length(sort_by) == 1 && tolower(sort_by[1]) == "value")
+        (is.character(sort_by) && length(sort_by) == 1 && tolower(sort_by) == "value")
     ) {
         if (is.logical(ascending)) {
             decreasing <- !ascending
-        } else if (
-            is.vector(ascending) &&
-            length(ascending) == 1 &&
-            is.logical(ascending[1])
-        ) {
-            decreasing <- !ascending[1]
         } else {
             decreasing <- FALSE
         }
-        obj_sorted <- sort(obj_filtered, decreasing=decreasing)
+
+        if (is.character(obj_filtered)) {
+            obj_sorted <- obj_filtered[order(tolower(obj_filtered), decreasing=decreasing, na.last=decreasing)]
+        } else {
+            obj_sorted <- obj_filtered[order(obj_filtered, decreasing=decreasing, na.last=decreasing)]
+        }
+        
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
     } else {
         obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len], obj_filtered)
@@ -279,7 +278,7 @@ get_dataframe_var <- function(
     dims <- dim(obj_filtered)
 
 
-    if (is.vector(sort_by) && length(sort_by) == 1 && tolower(sort_by[1]) == "index") {
+    if (is.character(sort_by) && length(sort_by) == 1 && tolower(sort_by) == "index") {
         if (is.logical(ascending)) {
             decreasing <- !ascending
         } else if (
