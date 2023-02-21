@@ -4,7 +4,13 @@
 \alias{format_var}
 \title{Get string containing json representation of a single var in the provided environment}
 \usage{
-format_var(envir, name, abbrev_len = DEFAULT_ABBREV_LEN)
+format_var(
+  envir,
+  name,
+  abbrev_len = DEFAULT_ABBREV_LEN,
+  sort_by = NULL,
+  ascending = NULL
+)
 }
 \arguments{
 \item{envir}{An environment}
@@ -12,6 +18,10 @@ format_var(envir, name, abbrev_len = DEFAULT_ABBREV_LEN)
 \item{name}{Name of a variable in the environment}
 
 \item{abbrev_len}{The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.}
+
+\item{sort_by}{A vector containing columns to sort (primary first)}
+
+\item{ascending}{A vector of booleans or a single boolean, depending on the data type}
 }
 \value{
 A string with a json representation of a var.
