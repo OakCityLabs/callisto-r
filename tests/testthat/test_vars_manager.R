@@ -871,6 +871,35 @@ test_that("format_var data.frame filtering min/max characters", {
 })
 
 
+test_that("format_var data.frame filtering on separate columns with search and min/max", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Billy J", "Maria", "Jen", "Tina"),
+        Age = c(23, 41, 416, 4136, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+
+    filters <- data.frame(
+        col = c("Age", "Name"),
+        search = c(NA, "a"),
+        min = c(26, NA),
+        max = c(416, NA)
+    )
+
+    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 2)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("3", "5"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Maria", "416", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
+})
+
+
 test_that("format_var vector multi element", {
     vector1 <- c(2, 3, 5, 1, 6, 7)
     vars <- format_var(environment(), "vector1", NULL)

@@ -260,13 +260,13 @@ get_dataframe_var <- function(
                     min <- filters[row, "min"]
                     max <- filters[row, "max"]
                     
-                    if (is.character(search)) {
+                    if (!is.na(search) && is.character(search)) {
                         obj_filtered <- obj_filtered[grepl(search, obj_filtered[,col_name], ignore.case=TRUE),]
                     }
-                    if (is.numeric(min) && col_numeric) {
+                    if (!is.na(min) && is.numeric(min) && col_numeric) {
                         obj_filtered <- obj_filtered[obj_filtered[,col_name] >= min,]
                     }
-                    if (is.numeric(max) && col_numeric) {
+                    if (!is.na(max) && is.numeric(max) && col_numeric) {
                         obj_filtered <- obj_filtered[obj_filtered[,col_name] <= max,]
                     }
                 }
