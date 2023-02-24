@@ -303,31 +303,40 @@ get_dataframe_var <- function(
         convert_param_to_character <- function(x) {
             # Returns "col_name" or "desc(col_name)" in character format
             # to be evaluated in 'dplyr::arrange()' later
-            col_name <- x["col"]
+            col_name <- x[1, "col"]
             return(
-                `if`(x["asc"], paste0(col_name), paste0("desc(", col_name, ")"))
+                `if`(
+                    x[1, "asc"],
+                    c(paste0("!is.na(", col_name, ")"), paste0(col_name)),
+                    paste0("desc(", col_name, ")")
+                )
             )
         }
 
+        # Parameters for arrange() function
+        params <- c()
+
+        # Create a dataframe with 'col' and 'asc' columns
+        # Each row will be a parameter in the arrange() function
         if (is.vector(ascending) && length(ascending) == length(sort_by)) {
             df_sort <- data.frame(
                 col = sort_by,
                 asc = ascending
             )
-            params <- apply(df_sort, 1, convert_param_to_character)
-    
         } else if (is.logical(ascending) && (ascending == FALSE || ascending[0] == FALSE)) {
             df_sort <- data.frame(
                 col = sort_by,
                 asc = FALSE
             )
-            params <- apply(df_sort, 1, convert_param_to_character)
         } else {
             df_sort <- data.frame(
                 col = sort_by,
                 asc = TRUE
             )
-            params <- apply(df_sort, 1, convert_param_to_character)
+        }
+
+        for (row in 1:nrow(df_sort)) {
+            params <- append(params, convert_param_to_character(df_sort[row,]))
         }
 
         # Sort by params generated above.
