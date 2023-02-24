@@ -1,3 +1,7 @@
+library(dplyr)
+library(rlang)
+library(tibble)
+
 KB <- 1024
 MB <- KB ** 2  # 1,048,576
 GB <- KB ** 3  # 1,073,741,824
@@ -293,20 +297,46 @@ get_dataframe_var <- function(
 
         obj_sorted <- obj_filtered[order(attr(obj_filtered, "row.names"), decreasing=decreasing),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
+
     } else if (is.vector(sort_by) && length(sort_by) > 0) {
-        order_params <- obj_filtered[match(sort_by, names(obj_filtered))]
+        
+        convert_param_to_character <- function(x) {
+                if (x["a"]) {
+                    return (
+                        paste0(x["s"])
+                    )
+                } else {
+                    return (
+                        paste0("desc(", x["s"], ")")
+                    )
+                }
+            }
 
         if (is.vector(ascending) && length(ascending) == length(sort_by)) {
-            i <- 0
-            for (col in order_params) {
-                i<-i+1
-                order_params[i] <- `if`(ascending[i], order_params[i], order_params[i]*-1)
-            }
-        } else if (is.logical(ascending) && ascending == FALSE) {
-            order_params <- order_params * -1
+            df_sort <- data.frame(
+                s = sort_by,
+                a = ascending
+            )
+            params <- apply(df_sort, 1, convert_param_to_character)
+    
+        } else if (is.logical(ascending) && (ascending == FALSE || ascending[0] == FALSE)) {
+            df_sort <- data.frame(
+                s = sort_by,
+                a = FALSE
+            )
+            params <- apply(df_sort, 1, convert_param_to_character)
+        } else {
+            df_sort <- data.frame(
+                s = sort_by,
+                a = TRUE
+            )
+            params <- apply(df_sort, 1, convert_param_to_character)
         }
 
-        obj_sorted <- obj_filtered[do.call(order, order_params),]
+        obj_sorted <- obj_filtered %>%
+                        rownames_to_column('_rows_') %>%
+                        arrange(!!! parse_exprs(params)) %>%
+                        column_to_rownames('_rows_')
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else {
         obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len,], obj_filtered)
