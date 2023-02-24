@@ -301,8 +301,8 @@ get_dataframe_var <- function(
     } else if (is.vector(sort_by) && length(sort_by) > 0) {
         
         convert_param_to_character <- function(x) {
-            # Returns "col_name" or "desc(col_name)" in character format
-            # to be evaluated in 'dplyr::arrange()' later
+            # Returns "!is.na(col_name), col_name" or "desc(col_name)" in character format
+            # to be evaluated in 'dplyr::arrange()' later.
             col_name <- x[1, "col"]
             return(
                 `if`(
