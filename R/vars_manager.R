@@ -1,7 +1,3 @@
-library(dplyr)
-library(rlang)
-library(tibble)
-
 KB <- 1024
 MB <- KB ** 2  # 1,048,576
 GB <- KB ** 3  # 1,073,741,824
@@ -231,6 +227,10 @@ get_matrix_var <- function(
     ))
 }
 
+
+#' @importFrom dplyr arrange %>%
+#' @importFrom rlang parse_exprs
+#' @importFrom tibble rownames_to_column column_to_rownames
 get_dataframe_var <- function(
     obj,
     name,
@@ -301,42 +301,41 @@ get_dataframe_var <- function(
     } else if (is.vector(sort_by) && length(sort_by) > 0) {
         
         convert_param_to_character <- function(x) {
-                if (x["a"]) {
-                    return (
-                        paste0(x["s"])
-                    )
-                } else {
-                    return (
-                        paste0("desc(", x["s"], ")")
-                    )
-                }
-            }
+            # Returns "col_name" or "desc(col_name)" in character format
+            # to be evaluated in 'dplyr::arrange()' later
+            col_name <- x["col"]
+            return(
+                `if`(x["asc"], paste0(col_name), paste0("desc(", col_name, ")"))
+            )
+        }
 
         if (is.vector(ascending) && length(ascending) == length(sort_by)) {
             df_sort <- data.frame(
-                s = sort_by,
-                a = ascending
+                col = sort_by,
+                asc = ascending
             )
             params <- apply(df_sort, 1, convert_param_to_character)
     
         } else if (is.logical(ascending) && (ascending == FALSE || ascending[0] == FALSE)) {
             df_sort <- data.frame(
-                s = sort_by,
-                a = FALSE
+                col = sort_by,
+                asc = FALSE
             )
             params <- apply(df_sort, 1, convert_param_to_character)
         } else {
             df_sort <- data.frame(
-                s = sort_by,
-                a = TRUE
+                col = sort_by,
+                asc = TRUE
             )
             params <- apply(df_sort, 1, convert_param_to_character)
         }
 
+        # Sort by params generated above.
+        # 'arrange' discards row.names, so we need to preserve them manually
         obj_sorted <- obj_filtered %>%
-                        rownames_to_column('_rows_') %>%
+                        rownames_to_column('_callisto_r_rows_') %>%
                         arrange(!!! parse_exprs(params)) %>%
-                        column_to_rownames('_rows_')
+                        column_to_rownames('_callisto_r_rows_')
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else {
         obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len,], obj_filtered)

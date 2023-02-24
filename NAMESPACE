@@ -2,3 +2,8 @@
 
 export(format_var)
 export(format_vars)
+importFrom(dplyr,"%>%")
+importFrom(dplyr,arrange)
+importFrom(rlang,parse_exprs)
+importFrom(tibble,column_to_rownames)
+importFrom(tibble,rownames_to_column)
