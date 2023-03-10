@@ -30,11 +30,11 @@ test_that("stat summary with data.frame", {
     )
     expect_equal(
         parsed_stats$Plant_date,
-        list(min="2023-03-02", max="2023-05-20", type="date", na_count=0)
+        list(min="2023-03-02", max="2023-05-20", unique_count=7, type="date", na_count=0)
     )
     expect_equal(
         parsed_stats$Harvest_date,
-        list(min="2023-06-06", max="2023-10-05", type="date", na_count=0)
+        list(min="2023-06-06", max="2023-10-05", unique_count=9, type="date", na_count=0)
     )
     expect_true(all.equal(
         parsed_stats$Germination,
@@ -122,7 +122,7 @@ test_that("stat summary vector dates", {
 
     expect_equal(
         parsed_stats$list1,
-        list(min="2020-01-30", max="2023-01-24", type="date", na_count=1)
+        list(min="2020-01-30", max="2023-01-24", unique_count=5, type="date", na_count=1)
     )
 })
 

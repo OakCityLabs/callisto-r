@@ -64,7 +64,8 @@ get_stats_column <- function(col) {
     } else if (inherits(col, c("Date"))) {
         min <- as.character(min(col, na.rm=TRUE))
         max <- as.character(max(col, na.rm=TRUE))
-        col_stats <- list(min=min, max=max, type="date")
+        n_unique <- length(unique(na.omit(col)))
+        col_stats <- list(min=min, max=max, unique_count=n_unique, type="date")
     } else {
         n_unique <- length(unique(na.omit(col)))
         col_stats <- list(
