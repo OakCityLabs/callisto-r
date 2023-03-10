@@ -2,3 +2,4 @@
 
 export(format_var)
 export(format_vars)
+export(get_var_stats)

@@ -7,7 +7,7 @@ get_stat_summary <- function(obj, name) {
     obj_length <- length(obj)
 
     intrinsic_types = c(
-        "character", "numeric", "integer", "logical", "complex", "raw", "Date"
+        "character", "numeric", "integer", "logical", "complex", "raw", "Date", "factor"
     )
 
     stats <- list()
@@ -99,7 +99,17 @@ create_exception_stats <- function(e) {
 }
 
 
-
+#' Get string containing json statistical summary for each column in a variable
+#'
+#' @param envir An environment 
+#' @param name Name of a variable in the environment
+#'
+#' @return A string with a json statistical summary for each column
+#' @export
+#'
+#' @examples
+#' x <- c(5,6)
+#' stats <- get_var_stats(environment(), "x")
 get_var_stats <- function(envir, name) {
     stats <- NULL
     obj <- get(name, envir=envir)

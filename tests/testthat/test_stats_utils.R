@@ -126,6 +126,31 @@ test_that("stat summary vector dates", {
     )
 })
 
+test_that("stat summary vector factors", {
+    list1 <- factor(c(
+        as.Date("2021-01-10"),
+        as.Date("2021-05-23"),
+        as.Date("2020-01-10"),
+        NA,
+        as.Date("2020-03-14"),
+        as.Date("2023-01-24"),
+        as.Date("2023-03-14")
+    ))
+
+    stats <- get_var_stats(environment(), "list1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$list1,
+        list(
+            type="category",
+            top_values=list('2020-01-10'=1, '2020-03-14'=1),
+            unique_count=2,
+            na_count=1
+        )
+    )
+})
+
 
 test_that("stat summary matrix", {
 
