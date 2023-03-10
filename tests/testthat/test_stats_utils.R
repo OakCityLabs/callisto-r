@@ -30,11 +30,11 @@ test_that("stat summary with data.frame", {
     )
     expect_equal(
         parsed_stats$Plant_date,
-        list(min="2023-03-02", max="2023-05-20", type="Date", na_count=0)
+        list(min="2023-03-02", max="2023-05-20", type="date", na_count=0)
     )
     expect_equal(
         parsed_stats$Harvest_date,
-        list(min="2023-06-06", max="2023-10-05", type="Date", na_count=0)
+        list(min="2023-06-06", max="2023-10-05", type="date", na_count=0)
     )
     expect_true(all.equal(
         parsed_stats$Germination,
@@ -54,6 +54,102 @@ test_that("stat summary with data.frame", {
             unique_count=2,
             na_count=0
         )
+    )
+    
+})
+
+
+test_that("stat summary list numeric", {
+    list1 <- list(4, 3, 5.5, NA, 1, -2, 35.2)
+
+    stats <- get_var_stats(environment(), "list1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$list1,
+        list(type="misc", unique_count=7, na_count=1)
+    )
+})
+
+test_that("stat summary vector strings", {
+    list1 <- c("Jon", "Bill", NA, "Maria", "Ben", "Tina")
+
+    stats <- get_var_stats(environment(), "list1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$list1,
+        list(type="misc", unique_count=5, na_count=1)
+    )
+})
+
+test_that("stat summary vector complex", {
+    list1 <- c(5+3i, 1+4i, NA, 3+3i, 2+7i, 1+3i)
+
+    stats <- get_var_stats(environment(), "list1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$list1,
+        list(type="misc", unique_count=5, na_count=1)
+    )
+})
+
+test_that("stat summary vector logical", {
+    list1 <- c(TRUE, FALSE, TRUE, TRUE, TRUE, FALSE)
+
+    stats <- get_var_stats(environment(), "list1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$list1,
+        list(type="misc", unique_count=2, na_count=0)
+    )
+})
+
+test_that("stat summary vector dates", {
+    list1 <- c(
+        as.Date("2021-01-10"),
+        as.Date("2021-05-23"),
+        as.Date("2020-01-30"),
+        NA,
+        as.Date("2020-03-14"),
+        as.Date("2023-01-24")
+    )
+
+    stats <- get_var_stats(environment(), "list1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$list1,
+        list(min="2020-01-30", max="2023-01-24", type="date", na_count=1)
+    )
+})
+
+
+test_that("stat summary matrix", {
+
+    mx1 <- matrix(
+        c(11, -34, 1, 5, NA, 3),
+        nrow = 2,
+        ncol = 3,
+        byrow = 1
+    )
+
+    stats <- get_var_stats(environment(), "mx1")
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(
+        parsed_stats$`1`,
+        list(min=5, max=11, mean=8, type="numeric", na_count=0)
+    )
+    expect_equal(
+        parsed_stats$`2`,
+        list(min=-34, max=-34, mean=-34, type="numeric", na_count=1)
+    )
+    expect_equal(
+        parsed_stats$`3`,
+        list(min=1, max=3, mean=2, type="numeric", na_count=0)
     )
     
 })

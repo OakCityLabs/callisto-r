@@ -6,16 +6,28 @@ get_stat_summary <- function(obj, name) {
     obj_class <- class(obj)
     obj_length <- length(obj)
 
-    intrinsic_types = c("character", "numeric", "integer", "logical", "complex", "raw")
+    intrinsic_types = c(
+        "character", "numeric", "integer", "logical", "complex", "raw", "Date"
+    )
 
-    if (is.data.frame(obj)) {
-        stats <- get_stats_dataframe(obj, name)
+    stats <- list()
+    if (length(obj_class) == 1 && obj_class %in% intrinsic_types) {
+        stats[[name]] <- get_stats_column(obj)
+    } else if (is.data.frame(obj)) {
+        for(i in 1:ncol(obj)) {
+            col <- obj[,i]
+            col_name <- colnames(obj)[i]
+            stats[[col_name]] <- get_stats_column(col)
+        }
+    } else if (length(obj_class) == 1 && is.list(obj)) {
+        stats[[name]] <- get_stats_column(obj)
+    } else if (is.matrix(obj) && length(dim(obj)) == 2) {
+        for (i in 1:ncol(obj)) {
+            col <- obj[,i]
+            col_name <- as.character(i)
+            stats[[col_name]] <- get_stats_column(col)
+        }
     }
-    # } else if (is.list(obj)) {
-    #     stats <- 
-    # } else if (is.matrix(obj) && length(dim(obj)) == 2) {
-    #     stats <-
-    # }
 
     return(stats)
 }
@@ -49,10 +61,10 @@ get_stats_column <- function(col) {
             top_values=top_values_list,
             unique_count=unique_count
         )
-    } else if (inherits(col, c("Date", "POSIXt"))) {
+    } else if (inherits(col, c("Date"))) {
         min <- as.character(min(col, na.rm=TRUE))
         max <- as.character(max(col, na.rm=TRUE))
-        col_stats <- list(min=min, max=max, type="Date")
+        col_stats <- list(min=min, max=max, type="date")
     } else {
         n_unique <- length(unique(na.omit(col)))
         col_stats <- list(
@@ -64,18 +76,6 @@ get_stats_column <- function(col) {
     col_stats["na_count"] <- na_count
 
     return(col_stats)
-}
-
-
-get_stats_dataframe <- function(obj, name) {
-    stats <- list()
-    for(i in 1:ncol(obj)) {
-        col <- obj[,i]
-        col_name <- colnames(obj)[i]
-        stats[[col_name]] <- get_stats_column(col)
-    }
-
-    return(stats)
 }
 
 
