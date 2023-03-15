@@ -1,0 +1,10 @@
+Name,Seed_spacing,Pot_size,Plant_date,Harvest_date,Germination,Maturation,Type
+Beetroot,5,5,"2023-04-01","2023-06-06",8,60,"Veggie"
+Broccoli,3,4,"2023-04-06","2023-07-20",5,75,"vegetable"
+Brussel sprouts,5,5,"2023-03-20","2023-09-05",10,84,"fruit"
+cabbages,5,10,"2023-04-05","2023-06-29",4,90,"Fruit"
+Carrots,2,5,"2023-05-05","2023-08-04",11,78,"Veggie"
+Kale,5,7,"2023-05-20","2023-10-05",3,65,"Veggie"
+Onions,2,5,"2023-03-02","2023-08-10",10,120,"fruit"
+Potatoes,12,,"2023-05-20","2023-09-10",11,105,"Veggie"
+Turnips,,10,"2023-03-20","2023-07-23",9,50,"fruit"
