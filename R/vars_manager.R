@@ -227,6 +227,10 @@ get_matrix_var <- function(
     ))
 }
 
+
+#' @importFrom dplyr arrange %>%
+#' @importFrom rlang parse_exprs
+#' @importFrom tibble rownames_to_column column_to_rownames
 get_dataframe_var <- function(
     obj,
     name,
@@ -260,13 +264,13 @@ get_dataframe_var <- function(
                     min <- filters[row, "min"]
                     max <- filters[row, "max"]
                     
-                    if (is.character(search)) {
+                    if (!is.na(search) && is.character(search)) {
                         obj_filtered <- obj_filtered[grepl(search, obj_filtered[,col_name], ignore.case=TRUE),]
                     }
-                    if (is.numeric(min) && col_numeric) {
+                    if (!is.na(min) && is.numeric(min) && col_numeric) {
                         obj_filtered <- obj_filtered[obj_filtered[,col_name] >= min,]
                     }
-                    if (is.numeric(max) && col_numeric) {
+                    if (!is.na(max) && is.numeric(max) && col_numeric) {
                         obj_filtered <- obj_filtered[obj_filtered[,col_name] <= max,]
                     }
                 }
@@ -293,20 +297,54 @@ get_dataframe_var <- function(
 
         obj_sorted <- obj_filtered[order(attr(obj_filtered, "row.names"), decreasing=decreasing),]
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
-    } else if (is.vector(sort_by) && length(sort_by) > 0) {
-        order_params <- obj_filtered[match(sort_by, names(obj_filtered))]
 
-        if (is.vector(ascending) && length(ascending) == length(sort_by)) {
-            i <- 0
-            for (col in order_params) {
-                i<-i+1
-                order_params[i] <- `if`(ascending[i], order_params[i], order_params[i]*-1)
-            }
-        } else if (is.logical(ascending) && ascending == FALSE) {
-            order_params <- order_params * -1
+    } else if (is.vector(sort_by) && length(sort_by) > 0) {
+        
+        convert_param_to_character <- function(x) {
+            # Returns "!is.na(col_name), col_name" or "desc(col_name)" in character format
+            # to be evaluated in 'dplyr::arrange()' later.
+            col_name <- x[1, "col"]
+            return(
+                `if`(
+                    x[1, "asc"],
+                    c(paste0("!is.na(", col_name, ")"), paste0(col_name)),
+                    paste0("desc(", col_name, ")")
+                )
+            )
         }
 
-        obj_sorted <- obj_filtered[do.call(order, order_params),]
+        # Parameters for arrange() function
+        params <- c()
+
+        # Create a dataframe with 'col' and 'asc' columns
+        # Each row will be a parameter in the arrange() function
+        if (is.vector(ascending) && length(ascending) == length(sort_by)) {
+            df_sort <- data.frame(
+                col = sort_by,
+                asc = ascending
+            )
+        } else if (is.logical(ascending) && (ascending == FALSE || ascending[0] == FALSE)) {
+            df_sort <- data.frame(
+                col = sort_by,
+                asc = FALSE
+            )
+        } else {
+            df_sort <- data.frame(
+                col = sort_by,
+                asc = TRUE
+            )
+        }
+
+        for (row in 1:nrow(df_sort)) {
+            params <- append(params, convert_param_to_character(df_sort[row,]))
+        }
+
+        # Sort by params generated above.
+        # 'arrange' discards row.names, so we need to preserve them manually
+        obj_sorted <- obj_filtered %>%
+                        rownames_to_column('_callisto_r_rows_') %>%
+                        arrange(!!! parse_exprs(params)) %>%
+                        column_to_rownames('_callisto_r_rows_')
         obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len,], obj_sorted)
     } else {
         obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len,], obj_filtered)

@@ -15,7 +15,10 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     rjson,
-    utils
+    utils,
+    dplyr,
+    rlang,
+    tibble
 Suggests: 
     testthat
 RoxygenNote: 7.2.0

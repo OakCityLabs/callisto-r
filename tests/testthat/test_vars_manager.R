@@ -612,6 +612,89 @@ test_that("format_var data.frame sorting by single column", {
     expect_equal(parsed_var$value$multi_value$data[[5]], c("Ben", "58", "TRUE"))
 })
 
+test_that("format_var data.frame sorting by character column descending", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Bill", "Maria", "Ben", "Tina"),
+        Age = c(23, 41, 32, 58, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+    vars <- format_var(environment(), "dataframe1", NULL, c("Name"), c(FALSE))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 5)
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c("Name (character)", "Age (numeric)", "Employed (logical)")
+    )
+    expect_equal(parsed_var$value$multi_value$row_names, c("5", "3", "1", "2", "4"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Tina", "26", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Maria", "32", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("Jon", "23", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[4]], c("Bill", "41", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[5]], c("Ben", "58", "TRUE"))
+})
+
+
+test_that("format_var data.frame sorting with NAs", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Bill", "Maria", NA, "Ben", NA, "Tina"),
+        Age = c(23, 41, NA, 32, 58, 26, NA),
+        Employed = c(NA, TRUE, FALSE, TRUE, TRUE, NA, NA)
+    )
+    vars <- format_var(environment(), "dataframe1", NULL, c("Name"), c(TRUE))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 7x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 7)
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c("Name (character)", "Age (numeric)", "Employed (logical)")
+    )
+    expect_equal(parsed_var$value$multi_value$row_names, c("4", "6", "5", "2", "1", "3", "7"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("NA", "32", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("NA", "26", "NA"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("Ben", "58", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[4]], c("Bill", "41", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[5]], c("Jon", "23", "NA"))
+    expect_equal(parsed_var$value$multi_value$data[[6]], c("Maria", "NA", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[7]], c("Tina", "NA", "NA"))
+})
+
+test_that("format_var data.frame sorting with NAs descending", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Bill", "Maria", NA, "Ben", NA, "Tina"),
+        Age = c(23, 41, NA, 32, 58, 26, NA),
+        Employed = c(NA, TRUE, FALSE, TRUE, TRUE, NA, NA)
+    )
+    vars <- format_var(environment(), "dataframe1", NULL, c("Employed", "Age"), c(FALSE, TRUE))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 7x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 7)
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c("Name (character)", "Age (numeric)", "Employed (logical)")
+    )
+    expect_equal(parsed_var$value$multi_value$row_names, c("4", "2", "5", "3", "7", "1", "6"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("NA", "32", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[3]], c("Ben", "58", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[4]], c("Maria", "NA", "FALSE"))
+    expect_equal(parsed_var$value$multi_value$data[[5]], c("Tina", "NA", "NA"))
+    expect_equal(parsed_var$value$multi_value$data[[6]], c("Jon", "23", "NA"))
+    expect_equal(parsed_var$value$multi_value$data[[7]], c("NA", "26", "NA"))
+})
+
 test_that("format_var data.frame sorting by single column abbreviated", {
     dataframe1 <- data.frame(
         Name = c("Jon", "Bill", "Maria", "Ben", "Tina"),
@@ -868,6 +951,35 @@ test_that("format_var data.frame filtering min/max characters", {
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Maria", "416", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[4]], c("Jen", "4136", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[5]], c("Tina", "26", "FALSE"))
+})
+
+
+test_that("format_var data.frame filtering on separate columns with search and min/max", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Billy J", "Maria", "Jen", "Tina"),
+        Age = c(23, 41, 416, 4136, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+
+    filters <- data.frame(
+        col = c("Age", "Name"),
+        search = c(NA, "a"),
+        min = c(26, NA),
+        max = c(416, NA)
+    )
+
+    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 2)
+    expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("3", "5"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Maria", "416", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
 })
 
 
