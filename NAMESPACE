@@ -2,6 +2,7 @@
 
 export(format_var)
 export(format_vars)
+export(get_var_stats)
 importFrom(dplyr,"%>%")
 importFrom(dplyr,arrange)
 importFrom(rlang,parse_exprs)
