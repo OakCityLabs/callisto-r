@@ -113,13 +113,18 @@ get_vector_var <- function(
         obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len], obj_filtered)
     }
 
-    data <- as.character(obj_pre)
+    data <- list()
     row_names <- list()
-    i <- 1
-    for (row_name in `if`(is.null(names(obj)), 1:length(obj_pre), names(obj_pre))) {
-        row_names[i] = as.character(row_name)
-        i <- i + 1
+
+    for (i in 1:length(obj_pre)) {
+        data[[i]] = list(as.character(obj_pre[i]))
+        if (is.null(names(obj_pre))) {
+            row_names[i] <- as.character(i)
+        } else {
+            row_names[i] <- as.character(names(obj_pre))[i]
+        }
     }
+
     return(list(
         summary=summary,
         abbrev=abbrev,
