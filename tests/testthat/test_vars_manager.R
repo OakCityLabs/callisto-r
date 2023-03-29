@@ -15,7 +15,7 @@ test_that("format_vars single element character vector", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "string1")
     expect_equal(parsed_vars[[1]]$type, "character")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "efs")
     expect_equal(parsed_vars[[1]]$value$single_value, "efs")
 })
@@ -27,7 +27,7 @@ test_that("format_vars single element numeric vector", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "numeric1")
     expect_equal(parsed_vars[[1]]$type, "numeric")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "342.3")
     expect_equal(parsed_vars[[1]]$value$single_value, "342.3")
 })
@@ -39,7 +39,7 @@ test_that("format_vars single element integer vector", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "integer1")
     expect_equal(parsed_vars[[1]]$type, "numeric")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "9")
     expect_equal(parsed_vars[[1]]$value$single_value, "9")
 })
@@ -51,7 +51,7 @@ test_that("format_vars single element logical vector", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "logical1")
     expect_equal(parsed_vars[[1]]$type, "logical")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "TRUE")
     expect_equal(parsed_vars[[1]]$value$single_value, "TRUE")
 })
@@ -63,7 +63,7 @@ test_that("format_vars single element complex vector", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "complex1")
     expect_equal(parsed_vars[[1]]$type, "complex")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "1+2i")
     expect_equal(parsed_vars[[1]]$value$single_value, "1+2i")
 })
@@ -75,13 +75,29 @@ test_that("format_vars multi element vector", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "vector1")
     expect_equal(parsed_vars[[1]]$type, "numeric")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "Length: 2")
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 1)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 2)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("vector1"))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, c("1", "2"))
     expect_equal(parsed_vars[[1]]$value$multi_value$data, c("4", "3"))
+})
+
+test_that("format_vars multi element vector no preview", {
+    vector1 <- c(4, 3)
+    vars <- format_vars(environment(), no_preview=TRUE)
+    parsed_vars = rjson::fromJSON(vars)
+    expect_equal(length(parsed_vars), 1)
+    expect_equal(parsed_vars[[1]]$name, "vector1")
+    expect_equal(parsed_vars[[1]]$type, "numeric")
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
+    expect_equal(parsed_vars[[1]]$summary, "Length: 2")
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 1)
+    expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 2)
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_names, NULL)
+    expect_equal(parsed_vars[[1]]$value$multi_value$row_names, NULL)
+    expect_equal(parsed_vars[[1]]$value$multi_value$data, NULL)
 })
 
 test_that("format_vars multi element list", {
@@ -91,7 +107,7 @@ test_that("format_vars multi element list", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "list1")
     expect_equal(parsed_vars[[1]]$type, "list")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "Length: 2")
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 1)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 2)
@@ -107,7 +123,7 @@ test_that("format_vars multi element list abbreviated", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "list1")
     expect_equal(parsed_vars[[1]]$type, "list")
-    expect_equal(parsed_vars[[1]]$abbreviated, TRUE)
+    expect_equal(parsed_vars[[1]]$has_next_page, TRUE)
     expect_equal(parsed_vars[[1]]$summary, "Length: 300")
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 1)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 300)
@@ -123,7 +139,7 @@ test_that("format_vars single element named list", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "list1")
     expect_equal(parsed_vars[[1]]$type, "list")
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(parsed_vars[[1]]$summary, "Length: 1")
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 1)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 1)
@@ -143,7 +159,7 @@ test_that("format_vars multiple element named list abbreviated", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "list1")
     expect_equal(parsed_vars[[1]]$type, "list")
-    expect_equal(parsed_vars[[1]]$abbreviated, TRUE)
+    expect_equal(parsed_vars[[1]]$has_next_page, TRUE)
     expect_equal(parsed_vars[[1]]$summary, "Length: 300")
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 1)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 300)
@@ -166,7 +182,7 @@ test_that("format_vars matrix", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "matrix1")
     expect_equal(grepl("matrix", parsed_vars[[1]]$type), TRUE)
-    expect_equal(parsed_vars[[1]]$abbreviated, FALSE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
     expect_equal(startsWith(parsed_vars[[1]]$summary, "Size: 4x7 Memory: "), TRUE)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 7)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 4)
@@ -177,6 +193,29 @@ test_that("format_vars matrix", {
         mdata[[i]] = as.character(i * 4 + 1:7)
     }
     expect_equal(parsed_vars[[1]]$value$multi_value$data, mdata)
+})
+
+test_that("format_vars matrix no preview", {
+    matrix1 <- matrix(nrow=4, ncol=7)
+    for (i in 1:4) {
+        for (j in 1:7) {
+            matrix1[i,j] = i * 4 + j
+        }
+    }
+    rm(i)
+    rm(j)
+    vars <- format_vars(environment(), no_preview=TRUE)
+    parsed_vars = rjson::fromJSON(vars)
+    expect_equal(length(parsed_vars), 1)
+    expect_equal(parsed_vars[[1]]$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_vars[[1]]$type), TRUE)
+    expect_equal(parsed_vars[[1]]$has_next_page, FALSE)
+    expect_equal(startsWith(parsed_vars[[1]]$summary, "Size: 4x7 Memory: "), TRUE)
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 7)
+    expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 4)
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_names, NULL)
+    expect_equal(parsed_vars[[1]]$value$multi_value$row_names, NULL)
+    expect_equal(parsed_vars[[1]]$value$multi_value$data, NULL)
 })
 
 test_that("format_vars matrix abbreviated", {
@@ -193,7 +232,7 @@ test_that("format_vars matrix abbreviated", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "matrix1")
     expect_equal(grepl("matrix", parsed_vars[[1]]$type), TRUE)
-    expect_equal(parsed_vars[[1]]$abbreviated, TRUE)
+    expect_equal(parsed_vars[[1]]$has_next_page, TRUE)
     expect_equal(startsWith(parsed_vars[[1]]$summary, "Size: 80x7 Memory: "), TRUE)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 7)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 80)
@@ -213,7 +252,7 @@ test_that("format_vars data.frame abbreviated", {
     expect_equal(length(parsed_vars), 1)
     expect_equal(parsed_vars[[1]]$name, "dataframe1")
     expect_equal(parsed_vars[[1]]$type, "data.frame")
-    expect_equal(parsed_vars[[1]]$abbreviated, TRUE)
+    expect_equal(parsed_vars[[1]]$has_next_page, TRUE)
     expect_equal(startsWith(parsed_vars[[1]]$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_count, 5)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 150)
@@ -233,11 +272,11 @@ test_that("format_vars data.frame abbreviated", {
 
 test_that("format_var multi element list long but not abbreviated", {
     list1 <- as.list(300:1)
-    vars <- format_var(environment(), "list1", NULL)
+    vars <- format_var(environment(), "list1", page_size=500)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "list1")
     expect_equal(parsed_var$type, "list")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 300")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 300)
@@ -252,11 +291,11 @@ test_that("format_var multi element named list long but not abbreviated", {
         list1[toString(i)] = i
     }
     rm(i)
-    vars <- format_var(environment(), "list1", NULL)
+    vars <- format_var(environment(), "list1", page_size=500)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "list1")
     expect_equal(parsed_var$type, "list")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 300")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 300)
@@ -275,11 +314,11 @@ test_that("format_var matrix long but not abbreviated", {
     }
     rm(i)
     rm(j)
-    vars <- format_var(environment(), "matrix1", NULL)
+    vars <- format_var(environment(), "matrix1", page_size=500)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 80x7 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 7)
     expect_equal(parsed_var$value$multi_value$row_count, 80)
@@ -305,7 +344,7 @@ test_that("format_var matrix abbreviated", {
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(startsWith(parsed_var$summary, "Size: 80x7 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 7)
     expect_equal(parsed_var$value$multi_value$row_count, 80)
@@ -318,14 +357,40 @@ test_that("format_var matrix abbreviated", {
     expect_equal(parsed_var$value$multi_value$data, mdata)
 })
 
-test_that("format_var matrix sort by single column", {
-    matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
-
-    vars <- format_var(environment(), "matrix1", NULL, c(1))
+test_that("format_var matrix paginated", {
+    matrix1 <- matrix(nrow=80, ncol=7)
+    for (i in 1:80) {
+        for (j in 1:7) {
+            matrix1[i,j] = i * 4 + j
+        }
+    }
+    rm(i)
+    rm(j)
+    vars <- format_var(environment(), "matrix1", page_size=5, page=2)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, TRUE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 80x7 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 7)
+    expect_equal(parsed_var$value$multi_value$row_count, 80)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:7))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:5))
+    mdata <- c()
+    for (i in 1:5) {
+        mdata[[i]] = as.character((i + 10) * 4 + 1:7)
+    }
+    expect_equal(parsed_var$value$multi_value$data, mdata)
+})
+
+test_that("format_var matrix sort by single column", {
+    matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
+
+    vars <- format_var(environment(), "matrix1", sort_by=c(1))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -342,11 +407,11 @@ test_that("format_var matrix sort by single column", {
 test_that("format_var matrix sort by single column descending abbreviated", {
     matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
 
-    vars <- format_var(environment(), "matrix1", 4, c(1), FALSE)
+    vars <- format_var(environment(), "matrix1", 4, sort_by=c(1), ascending=FALSE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -358,14 +423,31 @@ test_that("format_var matrix sort by single column descending abbreviated", {
     expect_equal(parsed_var$value$multi_value$data[[4]], c("4", "10"))
 })
 
-test_that("format_var matrix sort by multiple columns", {
+test_that("format_var matrix sort by single column descending paginated", {
     matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
 
-    vars <- format_var(environment(), "matrix1", NULL, c(1, 2), c(FALSE, TRUE))
+    vars <- format_var(environment(), "matrix1", page_size=2, page=1, sort_by=c(1), ascending=FALSE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, TRUE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 2)
+    expect_equal(parsed_var$value$multi_value$row_count, 6)
+    expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("5", "12"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("4", "10"))
+})
+
+test_that("format_var matrix sort by multiple columns", {
+    matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
+
+    vars <- format_var(environment(), "matrix1", sort_by=c(1, 2), ascending=c(FALSE, TRUE))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "matrix1")
+    expect_equal(grepl("matrix", parsed_var$type), TRUE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -382,11 +464,11 @@ test_that("format_var matrix sort by multiple columns", {
 test_that("format_var matrix sort by multiple columns abbreviated", {
     matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
 
-    vars <- format_var(environment(), "matrix1", 3, c(1, 2), c(FALSE, TRUE))
+    vars <- format_var(environment(), "matrix1", 3, sort_by=c(1, 2), ascending=c(FALSE, TRUE))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -400,11 +482,11 @@ test_that("format_var matrix sort by multiple columns abbreviated", {
 test_that("format_var matrix sort by multiple columns with single ascending value", {
     matrix1 <- matrix(c(5, 4, 2, 2, 7, 9, 12, 10, 15, 4, 6, 3), ncol=2)
 
-    vars <- format_var(environment(), "matrix1", NULL, c(2, 1), FALSE)
+    vars <- format_var(environment(), "matrix1", sort_by=c(2, 1), ascending=FALSE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -421,11 +503,11 @@ test_that("format_var matrix sort by multiple columns with single ascending valu
 test_that("format_var matrix sort with characters", {
     matrix1 <- matrix(c("hello","hi","ab","a","A","BC","Z","cool"), ncol=2)
 
-    vars <- format_var(environment(), "matrix1", NULL, c(1))
+    vars <- format_var(environment(), "matrix1", sort_by=c(1))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 4x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 4)
@@ -448,11 +530,11 @@ test_that("format_var matrix filtering search", {
         max = c(NA)
     )
 
-    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "matrix1", filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 4x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 2)
@@ -472,11 +554,11 @@ test_that("format_var matrix filtering min/max characters", {
         max = c("B")
     )
 
-    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "matrix1", filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 4x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 4)
@@ -498,11 +580,11 @@ test_that("format_var matrix filtering min/max numeric", {
         max = c(10.0)
     )
 
-    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "matrix1", filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 3)
@@ -523,11 +605,11 @@ test_that("format_var matrix filtering multiple columns", {
         max = c(10.0, 9)
     )
 
-    vars <- format_var(environment(), "matrix1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "matrix1", filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "matrix1")
     expect_equal(grepl("matrix", parsed_var$type), TRUE)
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 6x2 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 2)
@@ -540,11 +622,11 @@ test_that("format_var matrix filtering multiple columns", {
 
 test_that("format_var data.frame long but not abbreviated", {
     dataframe1 <- read.csv("iris.csv", colClasses=c("numeric", "numeric", "numeric", "numeric", "character"))
-    vars <- format_var(environment(), "dataframe1", NULL)
+    vars <- format_var(environment(), "dataframe1", page_size=500)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 5)
     expect_equal(parsed_var$value$multi_value$row_count, 150)
@@ -568,7 +650,7 @@ test_that("format_var data.frame abbreviated", {
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(startsWith(parsed_var$summary, "Size: 150x5 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 5)
     expect_equal(parsed_var$value$multi_value$row_count, 150)
@@ -586,17 +668,41 @@ test_that("format_var data.frame abbreviated", {
     expect_equal(length(parsed_var$value$multi_value$data), 5)
 })
 
+test_that("format_var data.frame paginated", {
+    dataframe1 <- read.csv("iris.csv")
+    vars <- format_var(environment(), "dataframe1", page_size=5, page=1)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$has_next_page, TRUE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 150x5 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 5)
+    expect_equal(parsed_var$value$multi_value$row_count, 150)
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c(
+            "sepallength (numeric)",
+            "sepalwidth (numeric)",
+            "petallength (numeric)",
+            "petalwidth (numeric)",
+            "class (character)"
+        )
+    )
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(6:10))
+    expect_equal(length(parsed_var$value$multi_value$data), 5)
+})
+
 test_that("format_var data.frame sorting by single column", {
     dataframe1 <- data.frame(
         Name = c("Jon", "Bill", "Maria", "Ben", "Tina"),
         Age = c(23, 41, 32, 58, 26),
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Age"))
+    vars <- format_var(environment(), "dataframe1", sort_by=c("Age"))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -612,17 +718,40 @@ test_that("format_var data.frame sorting by single column", {
     expect_equal(parsed_var$value$multi_value$data[[5]], c("Ben", "58", "TRUE"))
 })
 
+test_that("format_var data.frame sorting by single column paginated", {
+    dataframe1 <- data.frame(
+        Name = c("Jon", "Bill", "Maria", "Ben", "Tina"),
+        Age = c(23, 41, 32, 58, 26),
+        Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+    )
+    vars <- format_var(environment(), "dataframe1", page_size=2, page=1, sort_by=c("Age"))
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "dataframe1")
+    expect_equal(parsed_var$type, "data.frame")
+    expect_equal(parsed_var$has_next_page, TRUE)
+    expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
+    expect_equal(parsed_var$value$multi_value$column_count, 3)
+    expect_equal(parsed_var$value$multi_value$row_count, 5)
+    expect_equal(
+        parsed_var$value$multi_value$column_names,
+        c("Name (character)", "Age (numeric)", "Employed (logical)")
+    )
+    expect_equal(parsed_var$value$multi_value$row_names, c("3", "2"))
+    expect_equal(parsed_var$value$multi_value$data[[1]], c("Maria", "32", "TRUE"))
+    expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "FALSE"))
+})
+
 test_that("format_var data.frame sorting by character column descending", {
     dataframe1 <- data.frame(
         Name = c("Jon", "Bill", "Maria", "Ben", "Tina"),
         Age = c(23, 41, 32, 58, 26),
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Name"), c(FALSE))
+    vars <- format_var(environment(), "dataframe1", sort_by=c("Name"), ascending=c(FALSE))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -645,11 +774,13 @@ test_that("format_var data.frame sorting with NAs", {
         Age = c(23, 41, NA, 32, 58, 26, NA),
         Employed = c(NA, TRUE, FALSE, TRUE, TRUE, NA, NA)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Name"), c(TRUE))
+    vars <- format_var(
+        environment(), "dataframe1", page_size=NULL, sort_by=c("Name"), ascending=c(TRUE)
+    )
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 7x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 7)
@@ -673,11 +804,13 @@ test_that("format_var data.frame sorting with NAs descending", {
         Age = c(23, 41, NA, 32, 58, 26, NA),
         Employed = c(NA, TRUE, FALSE, TRUE, TRUE, NA, NA)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Employed", "Age"), c(FALSE, TRUE))
+    vars <- format_var(
+        environment(), "dataframe1", NULL, sort_by=c("Employed", "Age"), ascending=c(FALSE, TRUE)
+    )
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 7x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 7)
@@ -701,11 +834,11 @@ test_that("format_var data.frame sorting by single column abbreviated", {
         Age = c(23, 41, 32, 58, 26),
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
-    vars <- format_var(environment(), "dataframe1", abbrev_len=3, sort_by=c("Age"))
+    vars <- format_var(environment(), "dataframe1", page_size=3, sort_by=c("Age"))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -722,11 +855,11 @@ test_that("format_var data.frame sorting by multiple columns", {
         Age = c(23, 41, 32, 58, 26),
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Employed", "Age"))
+    vars <- format_var(environment(), "dataframe1", NULL, sort_by=c("Employed", "Age"))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -745,11 +878,13 @@ test_that("format_var data.frame sorting by multiple columns, one descending", {
         Age = c(23, 41, 32, 58, 26),
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Employed", "Age"), c(TRUE, FALSE))
+    vars <- format_var(
+        environment(), "dataframe1", NULL, sort_by=c("Employed", "Age"), ascending=c(TRUE, FALSE)
+    )
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -768,11 +903,11 @@ test_that("format_var data.frame sorting by multiple columns, both descending", 
         Age = c(23, 41, 32, 58, 26),
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
-    vars <- format_var(environment(), "dataframe1", NULL, c("Employed", "Age"), FALSE)
+    vars <- format_var(environment(), "dataframe1", NULL, sort_by=c("Employed", "Age"), ascending=FALSE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -792,11 +927,11 @@ test_that("format_var data.frame sorting by index descending", {
         Employed = c(TRUE, FALSE, TRUE, TRUE, FALSE)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, c("InDEx"), c(FALSE))
+    vars <- format_var(environment(), "dataframe1", NULL, sort_by=c("InDEx"), ascending=c(FALSE))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -819,11 +954,11 @@ test_that("format_var data.frame sorting by string index descending", {
     rownames(dataframe1) <- dataframe1$newIndex
     dataframe1$newIndex <- NULL
 
-    vars <- format_var(environment(), "dataframe1", NULL, "InDEx", FALSE)
+    vars <- format_var(environment(), "dataframe1", NULL, sort_by="InDEx", ascending=FALSE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -850,11 +985,11 @@ test_that("format_var data.frame filtering search", {
         max = c(NA)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "dataframe1", page_size=NULL, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 3)
@@ -879,11 +1014,11 @@ test_that("format_var data.frame filtering search multiple columns", {
         max = c(NA, NA)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "dataframe1", NULL, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 2)
@@ -907,11 +1042,11 @@ test_that("format_var data.frame filtering min/max numeric", {
         max = c(416)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "dataframe1", NULL, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 3)
@@ -936,11 +1071,11 @@ test_that("format_var data.frame filtering min/max characters", {
         max = c(416)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "dataframe1", NULL, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 5)
@@ -968,11 +1103,11 @@ test_that("format_var data.frame filtering on separate columns with search and m
         max = c(416, NA)
     )
 
-    vars <- format_var(environment(), "dataframe1", NULL, NULL, NULL, filters)
+    vars <- format_var(environment(), "dataframe1", NULL, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "dataframe1")
     expect_equal(parsed_var$type, "data.frame")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(startsWith(parsed_var$summary, "Size: 5x3 Memory: "), TRUE)
     expect_equal(parsed_var$value$multi_value$column_count, 3)
     expect_equal(parsed_var$value$multi_value$row_count, 2)
@@ -989,7 +1124,7 @@ test_that("format_var vector multi element", {
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "numeric")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -1001,11 +1136,11 @@ test_that("format_var vector multi element", {
 
 test_that("format_var vector sorting integers", {
     vector1 <- c(2, 3, 5, 1, 6, 7)
-    vars <- format_var(environment(), "vector1", NULL, "value")
+    vars <- format_var(environment(), "vector1", NULL, sort_by="value")
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "numeric")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -1017,11 +1152,11 @@ test_that("format_var vector sorting integers", {
 
 test_that("format_var vector sorting strings", {
     vector1 <- c("cc", "A", "aa", NA, "Z", "100", "11", NA)
-    vars <- format_var(environment(), "vector1", NULL, "value")
+    vars <- format_var(environment(), "vector1", NULL, sort_by="value")
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 8")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 8)
@@ -1033,11 +1168,11 @@ test_that("format_var vector sorting strings", {
 
 test_that("format_var vector sorting strings descending", {
     vector1 <- c("cc", "A", "aa", NA, "Z", "100", "11", NA)
-    vars <- format_var(environment(), "vector1", NULL, "value", FALSE)
+    vars <- format_var(environment(), "vector1", NULL, sort_by="value", ascending=FALSE)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 8")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 8)
@@ -1049,11 +1184,11 @@ test_that("format_var vector sorting strings descending", {
 
 test_that("format_var vector sorting abbreviated", {
     vector1 <- c("cc", "A", "aa", "Z", "100", "11")
-    vars <- format_var(environment(), "vector1", 4, c("value"))
+    vars <- format_var(environment(), "vector1", 4, sort_by=c("value"))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -1065,11 +1200,11 @@ test_that("format_var vector sorting abbreviated", {
 
 test_that("format_var vector sorting integers descending", {
     vector1 <- c(2, 3, 5, 1, 6, 7)
-    vars <- format_var(environment(), "vector1", NULL, "value", c(FALSE))
+    vars <- format_var(environment(), "vector1", NULL, sort_by="value", ascending=c(FALSE))
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "numeric")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -1089,11 +1224,11 @@ test_that("format_var vector search characters", {
         max = c(NA)
     )
 
-    vars <- format_var(environment(), "vector1", 4, NULL, NULL, filters)
+    vars <- format_var(environment(), "vector1", 4, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 3)
@@ -1112,11 +1247,13 @@ test_that("format_var vector search numeric abbreviated", {
         max = c(NA)
     )
 
-    vars <- format_var(environment(), "vector1", 2, "value", FALSE, filters)
+    vars <- format_var(
+        environment(), "vector1", 2, sort_by="value", ascending=FALSE, filters=filters
+    )
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "numeric")
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 3)
@@ -1135,11 +1272,11 @@ test_that("format_var vector min/max numeric", {
         max = c(3000)
     )
 
-    vars <- format_var(environment(), "vector1", 2, "value", NULL, filters)
+    vars <- format_var(environment(), "vector1", 2, sort_by="value", ascending=NULL, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "numeric")
-    expect_equal(parsed_var$abbreviated, TRUE)
+    expect_equal(parsed_var$has_next_page, TRUE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 3)
@@ -1158,11 +1295,11 @@ test_that("format_var vector min/max characters", {
         max = c("100")
     )
 
-    vars <- format_var(environment(), "vector1", 10, NULL, NULL, filters)
+    vars <- format_var(environment(), "vector1", 10, filters=filters)
     parsed_var = rjson::fromJSON(vars)
     expect_equal(parsed_var$name, "vector1")
     expect_equal(parsed_var$type, "character")
-    expect_equal(parsed_var$abbreviated, FALSE)
+    expect_equal(parsed_var$has_next_page, FALSE)
     expect_equal(parsed_var$summary, "Length: 6")
     expect_equal(parsed_var$value$multi_value$column_count, 1)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
@@ -1173,7 +1310,7 @@ test_that("format_var vector min/max characters", {
 
 
 test_that("format_var error", {
-    expect_error(format_var(environment(), "fakevar", NULL), "object 'fakevar' not found")
+    expect_error(format_var(environment(), "fakevar"), "object 'fakevar' not found")
 })
 
 test_that("create_exception_var returns formatted error", {
