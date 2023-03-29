@@ -8,3 +8,4 @@ dependencies:
   - r-testthat=3.1.4
   - r-knitr=1.39
   - r-rjson=0.2.20
+  - r-dplyr=1.1.1

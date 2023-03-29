@@ -526,6 +526,7 @@ create_exception_var <- function(e) {
 #'
 #' @param envir An environment 
 #' @param abbrev_len The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.
+#' @param no_preview Whether to return data for each variable. Default is FALSE, so each variable will return data.
 #'
 #' @return A string with a json list of vars.
 #' @export
@@ -564,7 +565,8 @@ format_vars <- function(envir, abbrev_len=DEFAULT_PAGE_SIZE, no_preview=FALSE) {
 #'
 #' @param envir An environment 
 #' @param name Name of a variable in the environment
-#' @param abbrev_len The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.
+#' @param page_size Number of elements to show on a single page
+#' @param page Zero-based page number
 #' @param sort_by A vector containing columns to sort (primary first)
 #' @param ascending A vector of booleans or a single boolean, depending on the data type
 #' @param filters A data.frame with a row for each column to filter. Columns must be: "col", "search", "min", "max"
