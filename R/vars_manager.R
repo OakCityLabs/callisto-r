@@ -3,7 +3,7 @@ MB <- KB ** 2  # 1,048,576
 GB <- KB ** 3  # 1,073,741,824
 TB <- KB ** 4  # 1,099,511,627,776
 
-DEFAULT_ABBREV_LEN <- 50
+DEFAULT_PAGE_SIZE <- 50
 
 human_bytes <- function(B) {
     # Return the given bytes as a human friendly KB, MB, GB, or TB string
@@ -44,7 +44,7 @@ make_multi_dict <- function(
 get_single_vector_var <- function(obj, name) {
     return(list(
         summary=as.character(obj),
-        abbrev=FALSE,
+        has_next_page=FALSE,
         value=list(single_value=as.character(obj))
     ))
 }
@@ -52,7 +52,9 @@ get_single_vector_var <- function(obj, name) {
 get_vector_var <- function(
     obj,
     name,
-    abbrev_len=DEFAULT_ABBREV_LEN,
+    no_preview=FALSE,
+    page_size=DEFAULT_PAGE_SIZE,
+    page=0,
     sort_by=NULL,
     ascending=NULL,
     filters=NULL
@@ -60,75 +62,86 @@ get_vector_var <- function(
     # sort_by should be a single string or a vector with a single string, "value"
     # ascending should be a single boolean, or a vector with a single boolean
     summary <- sprintf("Length: %d", length(obj))
+    has_next_page <- FALSE
+    preview <- NULL
 
-    obj_filtered <- obj
-    if (is.data.frame(filters) && length(filters) > 0) {
-        col_names <- colnames(filters)
-        if (
-            ("col" %in% col_names) &&
-            ("search" %in% col_names) &&
-            ("min" %in% col_names) &&
-            ("max" %in% col_names)
-        ) {
-            row1 <- filters[1,]
-            col_name <- row1$col[1]
+    if (!no_preview) {
+        obj_filtered <- obj
+        if (is.data.frame(filters) && length(filters) > 0) {
+            col_names <- colnames(filters)
+            if (
+                ("col" %in% col_names) &&
+                ("search" %in% col_names) &&
+                ("min" %in% col_names) &&
+                ("max" %in% col_names)
+            ) {
+                row1 <- filters[1,]
+                col_name <- row1$col[1]
 
-            if (is.character(col_name) && tolower(col_name) == "value") {
-                search <- row1$search[1]
-                min <- row1$min[1]
-                max <- row1$max[1]
-                obj_numeric <- is.numeric(obj)
-                if (is.character(search)) {
-                    obj_filtered <- obj_filtered[grepl(search, obj_filtered, ignore.case=TRUE)]
-                }
-                if (is.numeric(min) && obj_numeric) {
-                    obj_filtered <- obj_filtered[obj_filtered >= min]
-                }
-                if (is.numeric(max) && obj_numeric) {
-                    obj_filtered <- obj_filtered[obj_filtered <= max]
+                if (is.character(col_name) && tolower(col_name) == "value") {
+                    search <- row1$search[1]
+                    min <- row1$min[1]
+                    max <- row1$max[1]
+                    obj_numeric <- is.numeric(obj)
+                    if (is.character(search)) {
+                        obj_filtered <- obj_filtered[grepl(search, obj_filtered, ignore.case=TRUE)]
+                    }
+                    if (is.numeric(min) && obj_numeric) {
+                        obj_filtered <- obj_filtered[obj_filtered >= min]
+                    }
+                    if (is.numeric(max) && obj_numeric) {
+                        obj_filtered <- obj_filtered[obj_filtered <= max]
+                    }
                 }
             }
         }
-    }
 
-    abbrev <- !is.null(abbrev_len) && length(obj_filtered) > abbrev_len
+        # abbrev <- !is.null(abbrev_len) && length(obj_filtered) > abbrev_len
+        start <- `if`(page_size, page_size * page, 1)
+        has_next_page <- `if`(page_size, length(obj_filtered) > (start + page_size), FALSE)
+        end <- `if`(has_next_page, start + page_size, length(obj_filtered))
 
-    if (
-        (is.character(sort_by) && length(sort_by) == 1 && tolower(sort_by) == "value")
-    ) {
-        if (is.logical(ascending)) {
-            decreasing <- !ascending
+        if (
+            (is.character(sort_by) && length(sort_by) == 1 && tolower(sort_by) == "value")
+        ) {
+            if (is.logical(ascending)) {
+                decreasing <- !ascending
+            } else {
+                decreasing <- FALSE
+            }
+
+            if (is.character(obj_filtered)) {
+                obj_sorted <- obj_filtered[order(tolower(obj_filtered), decreasing=decreasing, na.last=decreasing)]
+            } else {
+                obj_sorted <- obj_filtered[order(obj_filtered, decreasing=decreasing, na.last=decreasing)]
+            }
+            
+            obj_pre <- obj_sorted[start:end]
         } else {
-            decreasing <- FALSE
+            obj_pre <- obj_filtered[start:end]
         }
 
-        if (is.character(obj_filtered)) {
-            obj_sorted <- obj_filtered[order(tolower(obj_filtered), decreasing=decreasing, na.last=decreasing)]
-        } else {
-            obj_sorted <- obj_filtered[order(obj_filtered, decreasing=decreasing, na.last=decreasing)]
+        data <- list()
+        row_names <- list()
+
+        for (i in 1:length(obj_pre)) {
+            data[[i]] = list(as.character(obj_pre[i]))
+            if (is.null(names(obj_pre))) {
+                row_names[i] <- as.character(i)
+            } else {
+                row_names[i] <- as.character(names(obj_pre))[i]
+            }
         }
-        
-        obj_pre <- `if`(abbrev, obj_sorted[1:abbrev_len], obj_sorted)
+
+        preview <- make_multi_dict(row_names, name, data, total_row_count=length(obj_filtered))
     } else {
-        obj_pre <- `if`(abbrev, obj_filtered[1:abbrev_len], obj_filtered)
-    }
-
-    data <- list()
-    row_names <- list()
-
-    for (i in 1:length(obj_pre)) {
-        data[[i]] = list(as.character(obj_pre[i]))
-        if (is.null(names(obj_pre))) {
-            row_names[i] <- as.character(i)
-        } else {
-            row_names[i] <- as.character(names(obj_pre))[i]
-        }
+        preview <- make_multi_dict(NULL, NULL, NULL, total_row_count=length(obj), total_column_count=1)
     }
 
     return(list(
         summary=summary,
-        abbrev=abbrev,
-        value=make_multi_dict(row_names, name, data, total_row_count=length(obj_filtered))
+        has_next_page=has_next_page,
+        value=preview
     ))
 }
 
@@ -390,9 +403,19 @@ get_dataframe_var <- function(
     ))
 }
 
-get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NULL, ascending=NULL, filters=NULL) {
-    # Get formatted info for a specific var. Pass abbrev_len=NULL
-    # to get non-abbreviated variable info
+get_var_details <- function(
+    obj,
+    name,
+    no_preview=FALSE,
+    page_size=DEFAULT_PAGE_SIZE,
+    page=0,
+    sort_by=NULL,
+    ascending=NULL,
+    filters=NULL
+) {
+    # Get formatted info for a specific var. Pass page_size=NULL
+    # to get non-abbreviated variable info. Pass no_preview=TRUE to exclude
+    # the preview of the var's data
     obj_type <- typeof(obj)
     obj_class <- class(obj)
     obj_length <- length(obj)
@@ -404,12 +427,16 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NU
         if (length(obj) == 1) {
             var_info <- get_single_vector_var(obj, name)
         } else {
-            var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending, filters)
+            var_info <- get_vector_var(
+                obj, name, no_preview, page_size, page, sort_by, ascending, filters
+            )
         }
     } else if (is.data.frame(obj)) {
         var_info <- get_dataframe_var(obj, name, abbrev_len, sort_by, ascending, filters)
     } else if (is.list(obj)) {
-        var_info <- get_vector_var(obj, name, abbrev_len, sort_by, ascending, filters)
+        var_info <- get_vector_var(
+            obj, name, no_preview, page_size, page, sort_by, ascending, filters
+        )
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {
         var_info <- get_matrix_var(obj, name, abbrev_len, sort_by, ascending, filters)
     } else {
@@ -423,7 +450,7 @@ get_var_details <- function(obj, name, abbrev_len=DEFAULT_ABBREV_LEN, sort_by=NU
     return(list(
         name=name,
         type=toString(obj_class),
-        abbreviated=var_info[["abbrev"]],
+        has_next_page=var_info[["has_next_page"]],
         summary=substr(var_info[["summary"]], 1, 140),  # limit summary length
         value=var_info[["value"]]
     ))
@@ -466,7 +493,7 @@ create_exception_var <- function(e) {
 #'
 #' @examples
 #' vars_json <- format_vars(environment())
-format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
+format_vars <- function(envir, abbrev_len=DEFAULT_PAGE_SIZE, no_preview=FALSE) {
     # Get string containing json representation of currently defined vars
     # (pass the output of `environment()` to this function)
     current_vars <- list()
@@ -483,7 +510,7 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
             if (grepl("closure", toString(obj_type)) || grepl("closure", toString(obj_class)) ) {
                 next
             }
-            var_details <- get_var_details(obj, name, abbrev_len)
+            var_details <- get_var_details(obj, name, page_size=abbrev_len, no_preview=no_preview)
 
             current_vars[[idx]] <- var_details
             idx <- idx + 1
@@ -512,7 +539,8 @@ format_vars <- function(envir, abbrev_len=DEFAULT_ABBREV_LEN) {
 format_var <- function(
     envir,
     name,
-    abbrev_len=DEFAULT_ABBREV_LEN,
+    page_size=DEFAULT_PAGE_SIZE,
+    page=0,
     sort_by=NULL,
     ascending=NULL,
     filters=NULL
@@ -520,7 +548,14 @@ format_var <- function(
     var_details <- NULL
     obj <- get(name, envir=envir)
     err_resp <- tryCatch({
-        var_details <- get_var_details(obj, name, abbrev_len, sort_by, ascending, filters)
+        var_details <- get_var_details(
+            obj,
+            name,
+            page_size,
+            sort_by,
+            ascending,
+            filters
+        )
     }, error=function(e) {
         return(create_exception_var(e))
     })
