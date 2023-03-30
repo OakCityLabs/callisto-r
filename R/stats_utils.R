@@ -1,7 +1,7 @@
 
 TOP_VALUES_LEN <- 3
 
-get_stat_summary <- function(obj, name) {
+get_stat_summary <- function(obj, name, column) {
     obj_type <- typeof(obj)
     obj_class <- class(obj)
     obj_length <- length(obj)
@@ -14,18 +14,30 @@ get_stat_summary <- function(obj, name) {
     if (length(obj_class) == 1 && obj_class %in% intrinsic_types) {
         stats[[name]] <- get_stats_column(obj)
     } else if (is.data.frame(obj)) {
-        for(i in 1:ncol(obj)) {
-            col <- obj[,i]
-            col_name <- colnames(obj)[i]
-            stats[[col_name]] <- get_stats_column(col)
+        if (is.null(column)) {
+            for(i in 1:ncol(obj)) {
+                col <- obj[,i]
+                col_name <- colnames(obj)[i]
+                stats[[col_name]] <- get_stats_column(col)
+            }
+        } else if (column %in% colnames(obj)) {
+            col <- obj[,column]
+            stats[[column]] <- get_stats_column(col)
         }
+        
     } else if (length(obj_class) == 1 && is.list(obj)) {
         stats[[name]] <- get_stats_column(obj)
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {
-        for (i in 1:ncol(obj)) {
-            col <- obj[,i]
-            col_name <- as.character(i)
-            stats[[col_name]] <- get_stats_column(col)
+        if (is.null(column)) {
+            for (i in 1:ncol(obj)) {
+                col <- obj[,i]
+                col_name <- as.character(i)
+                stats[[col_name]] <- get_stats_column(col)
+            }
+        } else if (is.numeric(column) && column >= 0 && column < ncol(obj)) {
+            col <- obj[,as.integer(column) + 1]
+
+            stats[[as.character(column + 1)]] <- get_stats_column(col)
         }
     }
 
@@ -103,6 +115,7 @@ create_exception_stats <- function(e) {
 #'
 #' @param envir An environment 
 #' @param name Name of a variable in the environment
+#' @param column Name of the column to return (returns all columns if not specified)
 #'
 #' @return A string with a json statistical summary for each column
 #' @export
@@ -110,11 +123,11 @@ create_exception_stats <- function(e) {
 #' @examples
 #' x <- c(5,6)
 #' stats <- get_var_stats(environment(), "x")
-get_var_stats <- function(envir, name) {
+get_var_stats <- function(envir, name, column=NULL) {
     stats <- NULL
     obj <- get(name, envir=envir)
     err_resp <- tryCatch({
-        stats <- get_stat_summary(obj, name)
+        stats <- get_stat_summary(obj, name, column)
     }, error=function(e) {
         return(create_exception_stats(e))
     })
