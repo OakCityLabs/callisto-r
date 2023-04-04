@@ -285,6 +285,21 @@ test_that("format_var multi element list long but not abbreviated", {
     expect_equal(parsed_var$value$multi_value$data, as.character(300:1))
 })
 
+test_that("format_var multi element list paginated", {
+    list1 <- list("bird", "cat", "dog", "owl", "worm", "slug", "ostrich")
+    vars <- format_var(environment(), "list1", page_size=2, page=2)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "list1")
+    expect_equal(parsed_var$type, "list")
+    expect_equal(parsed_var$has_next_page, TRUE)
+    expect_equal(parsed_var$summary, "Length: 7")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 7)
+    expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
+    expect_equal(parsed_var$value$multi_value$row_names, c("5", "6"))
+    expect_equal(parsed_var$value$multi_value$data, c("worm", "slug"))
+})
+
 test_that("format_var multi element named list long but not abbreviated", {
     list1 <- list()
     for (i in 1:300) {
@@ -375,7 +390,7 @@ test_that("format_var matrix paginated", {
     expect_equal(parsed_var$value$multi_value$column_count, 7)
     expect_equal(parsed_var$value$multi_value$row_count, 80)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:7))
-    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:5))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(11:15))
     mdata <- c()
     for (i in 1:5) {
         mdata[[i]] = as.character((i + 10) * 4 + 1:7)
@@ -435,7 +450,7 @@ test_that("format_var matrix sort by single column descending paginated", {
     expect_equal(parsed_var$value$multi_value$column_count, 2)
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
-    expect_equal(parsed_var$value$multi_value$row_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$row_names, as.character(3:4))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("5", "12"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("4", "10"))
 })

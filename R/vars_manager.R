@@ -126,7 +126,7 @@ get_vector_var <- function(
         for (i in 1:length(obj_pre)) {
             data[[i]] = list(as.character(obj_pre[i]))
             if (is.null(names(obj_pre))) {
-                row_names[i] <- as.character(i)
+                row_names[i] <- as.character(i + start - 1)
             } else {
                 row_names[i] <- as.character(names(obj_pre))[i]
             }
@@ -230,19 +230,15 @@ get_matrix_var <- function(
         }
 
         data <- list()
+        row_names <- list()
         for (i in 1:nrow(obj_pre)) {
             data[[i]] = as.list(as.character(obj_pre[i,]))
+            row_names[i] <- as.character(i + start - 1)
         }
         col_names <- list()
         i <- 1
         for (col_name in 1:ncol(obj_pre)) {
             col_names[i] <- as.character(col_name)
-            i <- i + 1
-        }
-        row_names <- list()
-        i <- 1
-        for (row_name in 1:nrow(obj_pre)) {
-            row_names[i] <- as.character(row_name)
             i <- i + 1
         }
 
@@ -395,6 +391,7 @@ get_dataframe_var <- function(
         }
 
         data <- list()
+        row_names <- list()
         if (length(obj_pre) > 0) {
             for (i in 1:nrow(obj_pre)) {
                 # If we use as.character on the whole row at once factors are represented as 
@@ -404,6 +401,12 @@ get_dataframe_var <- function(
                     data_row[[j]] = as.character(obj_pre[i,j])
                 }
                 data[[i]] = data_row
+
+                if (is.null(row.names(obj_pre))) {
+                    row_names[i] <- as.character(i + start - 1)
+                } else {
+                    row_names[i] <- as.character(row.names(obj_pre))[i]
+            }
             }
         }
         col_names <- list()
@@ -411,14 +414,6 @@ get_dataframe_var <- function(
             i <- 1
             for (col_name in `if`(length(names(obj_pre)) > 1, names(obj_pre), 1:ncol(obj_pre))) {
                 col_names[i] <- sprintf("%s (%s)", as.character(col_name), toString(class(obj_pre[,i])))
-                i <- i + 1
-            }
-        }
-        row_names <- list()
-        if (nrow(obj_pre) > 0) {
-            i <- 1
-            for (row_name in `if`(length(rownames(obj_pre)) > 1, rownames(obj_pre), 1:nrow(obj_pre))) {
-                row_names[i] <- as.character(row_name)
                 i <- i + 1
             }
         }
