@@ -236,7 +236,27 @@ test_that("stat summary single column with matrix", {
         byrow = 1
     )
 
-    stats <- get_var_stats(environment(), "mx1", 2)
+    stats <- get_var_stats(environment(), "mx1", 3)
+    parsed_stats = rjson::fromJSON(stats)
+
+    expect_equal(length(parsed_stats), 1)
+
+    expect_equal(
+        parsed_stats$`3`,
+        list(min=1, max=3, mean=2, type="numeric", na_count=0)
+    )
+})
+
+test_that("stat summary single column with matrix, character column name", {
+
+    mx1 <- matrix(
+        c(11, -34, 1, 5, NA, 3),
+        nrow = 2,
+        ncol = 3,
+        byrow = 1
+    )
+
+    stats <- get_var_stats(environment(), "mx1", "3")
     parsed_stats = rjson::fromJSON(stats)
 
     expect_equal(length(parsed_stats), 1)

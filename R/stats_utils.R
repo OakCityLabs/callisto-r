@@ -34,10 +34,15 @@ get_stat_summary <- function(obj, name, column) {
                 col_name <- as.character(i)
                 stats[[col_name]] <- get_stats_column(col)
             }
-        } else if (is.numeric(column) && column >= 0 && column < ncol(obj)) {
-            col <- obj[,as.integer(column) + 1]
-
-            stats[[as.character(column + 1)]] <- get_stats_column(col)
+        } else if (is.numeric(column) && column >= 1 && column <= ncol(obj)) {
+            col <- obj[,as.integer(column)]
+            stats[[as.character(column)]] <- get_stats_column(col)
+        } else if (is.character(column)) {
+            column_int <- as.integer(column)
+            if (column_int >= 1 && column_int <= ncol(obj)) {
+                col <- obj[,column_int]
+                stats[[column]] <- get_stats_column(col)
+            }
         }
     }
 
