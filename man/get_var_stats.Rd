@@ -4,12 +4,14 @@
 \alias{get_var_stats}
 \title{Get string containing json statistical summary for each column in a variable}
 \usage{
-get_var_stats(envir, name)
+get_var_stats(envir, name, column = NULL)
 }
 \arguments{
 \item{envir}{An environment}
 
 \item{name}{Name of a variable in the environment}
+
+\item{column}{Name of the column to return (returns all columns if not specified)}
 }
 \value{
 A string with a json statistical summary for each column
