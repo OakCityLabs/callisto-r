@@ -7,7 +7,8 @@
 format_var(
   envir,
   name,
-  abbrev_len = DEFAULT_ABBREV_LEN,
+  page_size = DEFAULT_PAGE_SIZE,
+  page = 0,
   sort_by = NULL,
   ascending = NULL,
   filters = NULL
@@ -18,7 +19,9 @@ format_var(
 
 \item{name}{Name of a variable in the environment}
 
-\item{abbrev_len}{The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.}
+\item{page_size}{Number of elements to show on a single page}
+
+\item{page}{Zero-based page number}
 
 \item{sort_by}{A vector containing columns to sort (primary first)}
 

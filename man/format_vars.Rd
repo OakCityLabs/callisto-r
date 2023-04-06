@@ -4,12 +4,14 @@
 \alias{format_vars}
 \title{Get string containing json representation of defined vars in the provided environment}
 \usage{
-format_vars(envir, abbrev_len = DEFAULT_ABBREV_LEN)
+format_vars(envir, abbrev_len = DEFAULT_PAGE_SIZE, no_preview = FALSE)
 }
 \arguments{
 \item{envir}{An environment}
 
 \item{abbrev_len}{The length of elements at which vars should be abbreviated. Pass NULL to prevent abbreviation.}
+
+\item{no_preview}{Whether to return data for each variable. Default is FALSE, so each variable will return data.}
 }
 \value{
 A string with a json list of vars.
