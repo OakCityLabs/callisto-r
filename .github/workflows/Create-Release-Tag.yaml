@@ -1,0 +1,39 @@
+name: Create-Release-Tag
+
+on:
+  workflow_run:
+    workflows: ["R-CMD-check"]
+    types: [completed]
+    branch: master
+
+jobs:
+  create-tag:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: rlib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+      - name: Get Version from DESCRIPTION
+        id: get_version
+        run: |
+        R -e 'install.packages("desc")'
+        R -e 'desc <- description$new()'
+        R -e 'version <- desc$get("Version")'
+        echo "TAG_VERSION=$(R -e version[[1]])" >> $GITHUB_OUTPUT
+
+      - uses: mukunku/tag-exists-action@v1.2.0
+        id: checkTag
+        with: 
+          tag: ${{ steps.get_version.TAG_VERSION }}
+      
+      - uses: rickstaa/action-create-tag@v1
+        if: steps.checkTag.outputs.exists == 'false'
+        id: "tag_create"
+        with:
+          tag: ${{ steps.get_version.TAG_VERSION }}
+          tag_exists_error: true
+          message: "Release ${{ steps.get_version.TAG_VERSION }}"
+
+
+
