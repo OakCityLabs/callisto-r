@@ -44,3 +44,9 @@ jobs:
           extra-packages: any::rcmdcheck
 
       - uses: r-lib/actions/check-r-package@v2
+
+  create-tag:
+    if: ${{ github.event_name == 'push' }}
+    needs: [R-CMD-check]
+    steps:
+      - uses: ./.github/workflows/Create-Release-Tag.yaml
