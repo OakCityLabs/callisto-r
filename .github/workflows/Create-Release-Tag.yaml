@@ -13,7 +13,7 @@ jobs:
       - name: Get Version from DESCRIPTION
         id: get_version
         run: |
-          VERSION=$(awk '/Version/' ./DESCRIPTION | awk -F': ' '{print "v" $2}')
+          VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')
           echo "TAG=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Echo tag
@@ -42,7 +42,8 @@ jobs:
       - name: Get Version from DESCRIPTION
         id: get_version
         run: |
-          VERSION=$(awk '/Version/' ./DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
+          VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
+          echo $VERSION
           echo "TAG=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Echo tag
