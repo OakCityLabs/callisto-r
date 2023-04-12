@@ -13,7 +13,7 @@ jobs:
       - id: parse_version
         run: |
           VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')
-          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG={VERSION}" >> $GITHUB_OUTPUT
       
       - name: Echo tag
         run: |
@@ -42,7 +42,7 @@ jobs:
         run: |
           VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
           echo $VERSION
-          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG={VERSION}" >> $GITHUB_OUTPUT
       
       - name: Echo tag
         run: |
