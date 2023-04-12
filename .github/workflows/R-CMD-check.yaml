@@ -46,7 +46,7 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
 
   create-tag:
-    runs-on: [self-hosted, Linux, robby]
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' }}
     needs: [R-CMD-check]
     steps:
