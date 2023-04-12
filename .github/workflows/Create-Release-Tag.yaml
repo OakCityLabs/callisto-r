@@ -13,7 +13,12 @@ jobs:
       - name: Get Version from DESCRIPTION
         id: get_version
         run: |
-          echo "TAG=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')" >> $GITHUB_OUTPUT
+          VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')
+          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Echo tag
+        run: |
+          echo "Generated tag: ${{ steps.get_version.TAG }}"
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: checkTag
@@ -37,7 +42,8 @@ jobs:
       - name: Get Version from DESCRIPTION
         id: get_version
         run: |
-          echo "TAG=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')" >> $GITHUB_OUTPUT
+          VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
+          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Echo tag
         run: |
