@@ -13,24 +13,24 @@ jobs:
       - id: parse_version
         run: |
           VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')
-          echo "TAG={VERSION}" >> $GITHUB_OUTPUT
+          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Echo tag
         run: |
-          echo "Generated tag: ${{ steps.parse_version.TAG }}"
+          echo "Generated tag: ${{ steps.parse_version.outputs.TAG }}"
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: checkTag
         with: 
-          tag: ${{ steps.parse_version.TAG }}
+          tag: ${{ steps.parse_version.outputs.TAG }}
       
       - uses: rickstaa/action-create-tag@v1
         if: steps.checkTag.outputs.exists == 'false'
         id: "tag_create"
         with:
-          tag: ${{ steps.parse_version.TAG }}
+          tag: ${{ steps.parse_version.outputs.TAG }}
           tag_exists_error: true
-          message: "Release ${{ steps.parse_version.TAG }}"
+          message: "Release ${{ steps.parse_version.outputs.TAG }}"
   
   create-tag-dev:
     runs-on: ubuntu-latest
@@ -42,24 +42,24 @@ jobs:
         run: |
           VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
           echo $VERSION
-          echo "TAG={VERSION}" >> $GITHUB_OUTPUT
+          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Echo tag
         run: |
-          echo "Generated tag: ${{ steps.parse_version.TAG }}"
+          echo "Generated tag: ${{ steps.parse_version.outputs.TAG }}"
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: checkTag
         with: 
-          tag: ${{ steps.parse_version.TAG }}
+          tag: ${{ steps.parse_version.outputs.TAG }}
       
       - uses: rickstaa/action-create-tag@v1
         if: steps.checkTag.outputs.exists == 'false'
         id: "tag_create"
         with:
-          tag: ${{ steps.parse_version.TAG }}
+          tag: ${{ steps.parse_version.outputs.TAG }}
           tag_exists_error: true
-          message: "Release ${{ steps.parse_version.TAG }}"
+          message: "Release ${{ steps.parse_version.outputs.TAG }}"
 
 
 
