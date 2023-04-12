@@ -5,6 +5,7 @@ on:
 
 jobs:
   create-tag-master:
+    runs-on: [self-hosted, Linux, robby]
     if: ${{ github.ref_name == 'master' }}
     steps:
       - uses: actions/checkout@v3
@@ -30,6 +31,7 @@ jobs:
           message: "Release ${{ steps.get_version.TAG }}"
   
   create-tag-dev:
+    runs-on: [self-hosted, Linux, robby]
     if: ${{ github.ref_name == 'dev' }}
     steps:
       - uses: actions/checkout@v3
