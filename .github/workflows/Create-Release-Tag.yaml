@@ -10,28 +10,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get Version from DESCRIPTION
-        id: get_version
+      - id: parse_version
         run: |
           VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')
           echo "TAG=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Echo tag
         run: |
-          echo "Generated tag: ${{ steps.get_version.TAG }}"
+          echo "Generated tag: ${{ steps.parse_version.TAG }}"
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: checkTag
         with: 
-          tag: ${{ steps.get_version.TAG }}
+          tag: ${{ steps.parse_version.TAG }}
       
       - uses: rickstaa/action-create-tag@v1
         if: steps.checkTag.outputs.exists == 'false'
         id: "tag_create"
         with:
-          tag: ${{ steps.get_version.TAG }}
+          tag: ${{ steps.parse_version.TAG }}
           tag_exists_error: true
-          message: "Release ${{ steps.get_version.TAG }}"
+          message: "Release ${{ steps.parse_version.TAG }}"
   
   create-tag-dev:
     runs-on: ubuntu-latest
@@ -39,8 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get Version from DESCRIPTION
-        id: get_version
+      - id: parse_version
         run: |
           VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
           echo $VERSION
@@ -48,20 +46,20 @@ jobs:
       
       - name: Echo tag
         run: |
-          echo "Generated tag: ${{ steps.get_version.TAG }}"
+          echo "Generated tag: ${{ steps.parse_version.TAG }}"
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: checkTag
         with: 
-          tag: ${{ steps.get_version.TAG }}
+          tag: ${{ steps.parse_version.TAG }}
       
       - uses: rickstaa/action-create-tag@v1
         if: steps.checkTag.outputs.exists == 'false'
         id: "tag_create"
         with:
-          tag: ${{ steps.get_version.TAG }}
+          tag: ${{ steps.parse_version.TAG }}
           tag_exists_error: true
-          message: "Release ${{ steps.get_version.TAG }}"
+          message: "Release ${{ steps.parse_version.TAG }}"
 
 
 
