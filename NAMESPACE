@@ -3,6 +3,7 @@
 export(format_var)
 export(format_vars)
 export(get_var_stats)
+export(send_notification)
 importFrom(dplyr,"%>%")
 importFrom(dplyr,arrange)
 importFrom(rlang,parse_exprs)
