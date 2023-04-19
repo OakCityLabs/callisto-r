@@ -133,7 +133,9 @@ get_vector_var <- function(
             }
         }
 
-        preview <- make_multi_dict(row_names, name, data, total_row_count=length(obj_filtered))
+        column_types = c(get_column_type(obj))
+
+        preview <- make_multi_dict(row_names, name, data, total_row_count=length(obj_filtered), column_types=column_types)
     } else {
         preview <- make_multi_dict(NULL, NULL, NULL, total_row_count=length(obj), total_column_count=1)
     }
@@ -243,8 +245,15 @@ get_matrix_var <- function(
             i <- i + 1
         }
 
+        i <- 1
+        column_types <- c()
+        for (col in 1:ncol(obj)) {
+            column_types <- append(column_types, get_column_type(obj[,i]))
+            i <- i + 1
+        }
+
         preview <- make_multi_dict(
-            row_names, col_names, data, total_row_count=dims[[1]], total_column_count=dims[[2]]
+            row_names, col_names, data, total_row_count=dims[[1]], total_column_count=dims[[2]], column_types=column_types
         )
     } else {
         dims <- dim(obj)
