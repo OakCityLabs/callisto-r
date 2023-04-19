@@ -21,7 +21,7 @@ human_bytes <- function(B) {
 }
 
 make_multi_dict <- function(
-    row_names, column_names, data, total_row_count=NULL, total_column_count=NULL
+    row_names, column_names, data, total_row_count=NULL, total_column_count=NULL, column_types=NULL
 ) {
     # column_count and row_count should be values for the whole data structure
     # column_names and row_names are values for the possibly abbreviated structure
@@ -36,7 +36,8 @@ make_multi_dict <- function(
         row_count=`if`(!is.null(total_row_count), total_row_count, length(row_names)),
         column_names=column_names,
         row_names=row_names,
-        data=data
+        data=data,
+        column_types=column_types
     )
     return(list(multi_value=value))
 }
@@ -263,6 +264,7 @@ get_matrix_var <- function(
 #' @importFrom dplyr arrange %>%
 #' @importFrom rlang parse_exprs
 #' @importFrom tibble rownames_to_column column_to_rownames
+#' @importFrom frictionless create_schema
 get_dataframe_var <- function(
     obj,
     name,
@@ -418,8 +420,10 @@ get_dataframe_var <- function(
             }
         }
 
+        column_types <- unlist(lapply(obj, get_column_type), use.names=FALSE)
+        
         preview <- make_multi_dict(
-            row_names, col_names, data, total_row_count=dims[[1]], total_column_count=dims[[2]]
+            row_names, col_names, data, total_row_count=dims[[1]], total_column_count=dims[[2]], column_types=column_types
         )
     } else {
         dims <- dim(obj)

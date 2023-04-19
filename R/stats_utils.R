@@ -115,6 +115,28 @@ create_exception_stats <- function(e) {
     )
 }
 
+#' @importFrom dplyr recode
+get_column_type <- function(col) {
+    # This function is taken from the "frictionless-r" repo which implements
+    # Frictionless Data standards
+    # https://github.com/frictionlessdata/frictionless-r/blob/main/R/create_schema.R
+
+    type <- paste(class(col), collapse = ",") # When data type is a vector
+    type <- dplyr::recode(type,
+        "character" = "string",
+        "Date" = "date",
+        "difftime" = "number",
+        "factor" = "string",
+        "hms,difftime" = "time", # Data read using col_time()
+        "integer" = "integer",
+        "logical" = "boolean",
+        "numeric" = "number", # Includes double
+        "POSIXct,POSIXt" = "datetime", # Includes POSIXlt,POSIXt
+        .default = "any"
+    )
+    return(type)
+}
+
 
 #' Get string containing json statistical summary for each column in a variable
 #'
