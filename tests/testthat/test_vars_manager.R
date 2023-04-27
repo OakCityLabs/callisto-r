@@ -97,6 +97,7 @@ test_that("format_vars multi element vector no preview", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 2)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, NULL)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, NULL)
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_types, NULL)
     expect_equal(parsed_vars[[1]]$value$multi_value$data, NULL)
 })
 
@@ -113,6 +114,7 @@ test_that("format_vars multi element list", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 2)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("list1"))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, c("1", "2"))
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_types, c("any"))
     expect_equal(parsed_vars[[1]]$value$multi_value$data, c("4", "3"))
 })
 
@@ -129,6 +131,7 @@ test_that("format_vars multi element list abbreviated", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 300)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("list1"))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:50))
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_types, c("any"))
     expect_equal(parsed_vars[[1]]$value$multi_value$data, as.character(300:251))
 })
 
@@ -145,6 +148,7 @@ test_that("format_vars single element named list", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 1)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("list1"))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, c("cool"))
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_types, c("any"))
     expect_equal(parsed_vars[[1]]$value$multi_value$data, c("kat"))
 })
 
@@ -165,6 +169,7 @@ test_that("format_vars multiple element named list abbreviated", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 300)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, c("list1"))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:50))
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_types, c("any"))
     expect_equal(parsed_vars[[1]]$value$multi_value$data, as.character(1:50))
 })
 
@@ -188,6 +193,10 @@ test_that("format_vars matrix", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 4)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, as.character(1:7))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:4))
+    expect_equal(
+        parsed_vars[[1]]$value$multi_value$column_types,
+        c("number", "number", "number", "number", "number", "number", "number")
+    )
     mdata <- c()
     for (i in 1:4) {
         mdata[[i]] = as.character(i * 4 + 1:7)
@@ -215,6 +224,7 @@ test_that("format_vars matrix no preview", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 4)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, NULL)
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, NULL)
+    expect_equal(parsed_vars[[1]]$value$multi_value$column_types, NULL)
     expect_equal(parsed_vars[[1]]$value$multi_value$data, NULL)
 })
 
@@ -238,6 +248,10 @@ test_that("format_vars matrix abbreviated", {
     expect_equal(parsed_vars[[1]]$value$multi_value$row_count, 80)
     expect_equal(parsed_vars[[1]]$value$multi_value$column_names, as.character(1:7))
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:7))
+    expect_equal(
+        parsed_vars[[1]]$value$multi_value$column_types,
+        c("number", "number", "number", "number", "number", "number", "number")
+    )
     mdata <- c()
     for (i in 1:7) {
         mdata[[i]] = as.character(i * 4 + 1:7)
@@ -267,6 +281,10 @@ test_that("format_vars data.frame abbreviated", {
         )
     )
     expect_equal(parsed_vars[[1]]$value$multi_value$row_names, as.character(1:7))
+    expect_equal(
+        parsed_vars[[1]]$value$multi_value$column_types,
+        c("number", "number", "number", "number", "string")
+    )
     expect_equal(length(parsed_vars[[1]]$value$multi_value$data), 7)
 })
 
@@ -282,6 +300,7 @@ test_that("format_var multi element list long but not abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 300)
     expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:300))
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
     expect_equal(parsed_var$value$multi_value$data, as.character(300:1))
 })
 
@@ -297,6 +316,7 @@ test_that("format_var multi element list paginated", {
     expect_equal(parsed_var$value$multi_value$row_count, 7)
     expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
     expect_equal(parsed_var$value$multi_value$row_names, c("5", "6"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
     expect_equal(parsed_var$value$multi_value$data, c("worm", "slug"))
 })
 
@@ -317,6 +337,7 @@ test_that("format_var multi element named list long but not abbreviated", {
     expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
     row_names = as.character(1:300)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
     expect_equal(parsed_var$value$multi_value$data, as.character(1:300))
 })
 
@@ -339,6 +360,10 @@ test_that("format_var matrix long but not abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 80)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:7))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:80))
+    expect_equal(
+        parsed_var$value$multi_value$column_types,
+        c("number", "number", "number", "number", "number", "number", "number")
+    )
     mdata <- c()
     for (i in 1:80) {
         mdata[[i]] = as.character(i * 4 + 1:7)
@@ -365,6 +390,10 @@ test_that("format_var matrix abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 80)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:7))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:5))
+    expect_equal(
+        parsed_var$value$multi_value$column_types,
+        c("number", "number", "number", "number", "number", "number", "number")
+    )
     mdata <- c()
     for (i in 1:5) {
         mdata[[i]] = as.character(i * 4 + 1:7)
@@ -391,6 +420,10 @@ test_that("format_var matrix paginated", {
     expect_equal(parsed_var$value$multi_value$row_count, 80)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:7))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(11:15))
+    expect_equal(
+        parsed_var$value$multi_value$column_types,
+        c("number", "number", "number", "number", "number", "number", "number")
+    )
     mdata <- c()
     for (i in 1:5) {
         mdata[[i]] = as.character((i + 10) * 4 + 1:7)
@@ -411,6 +444,7 @@ test_that("format_var matrix sort by single column", {
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:6))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("2", "15"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("2", "4"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("4", "10"))
@@ -432,6 +466,7 @@ test_that("format_var matrix sort by single column descending abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:4))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("9", "3"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("7", "6"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("5", "12"))
@@ -451,6 +486,7 @@ test_that("format_var matrix sort by single column descending paginated", {
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(3:4))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("5", "12"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("4", "10"))
 })
@@ -468,6 +504,7 @@ test_that("format_var matrix sort by multiple columns", {
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:6))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("9", "3"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("7", "6"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("5", "12"))
@@ -489,6 +526,7 @@ test_that("format_var matrix sort by multiple columns abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:3))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("9", "3"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("7", "6"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("5", "12"))
@@ -507,6 +545,7 @@ test_that("format_var matrix sort by multiple columns with single ascending valu
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:6))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("2", "15"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("5", "12"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("4", "10"))
@@ -528,6 +567,7 @@ test_that("format_var matrix sort with characters", {
     expect_equal(parsed_var$value$multi_value$row_count, 4)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:4))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "string"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("a", "cool"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("ab", "Z"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("hello", "A"))
@@ -555,6 +595,7 @@ test_that("format_var matrix filtering search", {
     expect_equal(parsed_var$value$multi_value$row_count, 2)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "string"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("hello", "A"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("hi", "BC"))
 })
@@ -579,6 +620,7 @@ test_that("format_var matrix filtering min/max characters", {
     expect_equal(parsed_var$value$multi_value$row_count, 4)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:4))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "string"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("hello", "A"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("hi", "BC"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("ab", "Z"))
@@ -605,6 +647,7 @@ test_that("format_var matrix filtering min/max numeric", {
     expect_equal(parsed_var$value$multi_value$row_count, 3)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:3))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("4", "10"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("2", "4"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("7", "6"))
@@ -630,6 +673,7 @@ test_that("format_var matrix filtering multiple columns", {
     expect_equal(parsed_var$value$multi_value$row_count, 2)
     expect_equal(parsed_var$value$multi_value$column_names, as.character(1:2))
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:2))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("4", "10"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("7", "6"))
 })
@@ -656,6 +700,7 @@ test_that("format_var data.frame long but not abbreviated", {
         )
     )
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:150))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number", "number", "number", "string"))
     expect_equal(length(parsed_var$value$multi_value$data), 150)
 })
 
@@ -680,6 +725,7 @@ test_that("format_var data.frame abbreviated", {
         )
     )
     expect_equal(parsed_var$value$multi_value$row_names, as.character(1:5))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number", "number", "number", "string"))
     expect_equal(length(parsed_var$value$multi_value$data), 5)
 })
 
@@ -704,6 +750,7 @@ test_that("format_var data.frame paginated", {
         )
     )
     expect_equal(parsed_var$value$multi_value$row_names, as.character(6:10))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number", "number", "number", "number", "string"))
     expect_equal(length(parsed_var$value$multi_value$data), 5)
 })
 
@@ -726,6 +773,7 @@ test_that("format_var data.frame sorting by single column", {
         c("Name (character)", "Age (numeric)", "Employed (logical)")
     )
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "5", "3", "2", "4"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Maria", "32", "TRUE"))
@@ -752,6 +800,7 @@ test_that("format_var data.frame sorting by single column paginated", {
         c("Name (character)", "Age (numeric)", "Employed (logical)")
     )
     expect_equal(parsed_var$value$multi_value$row_names, c("3", "2"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Maria", "32", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "FALSE"))
 })
@@ -775,6 +824,7 @@ test_that("format_var data.frame sorting by character column descending", {
         c("Name (character)", "Age (numeric)", "Employed (logical)")
     )
     expect_equal(parsed_var$value$multi_value$row_names, c("5", "3", "1", "2", "4"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Maria", "32", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Jon", "23", "TRUE"))
@@ -804,6 +854,7 @@ test_that("format_var data.frame sorting with NAs", {
         c("Name (character)", "Age (numeric)", "Employed (logical)")
     )
     expect_equal(parsed_var$value$multi_value$row_names, c("4", "6", "5", "2", "1", "3", "7"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("NA", "32", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("NA", "26", "NA"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Ben", "58", "TRUE"))
@@ -834,6 +885,7 @@ test_that("format_var data.frame sorting with NAs descending", {
         c("Name (character)", "Age (numeric)", "Employed (logical)")
     )
     expect_equal(parsed_var$value$multi_value$row_names, c("4", "2", "5", "3", "7", "1", "6"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("NA", "32", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Ben", "58", "TRUE"))
@@ -859,6 +911,7 @@ test_that("format_var data.frame sorting by single column abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "5", "3"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Maria", "32", "TRUE"))
@@ -880,6 +933,7 @@ test_that("format_var data.frame sorting by multiple columns", {
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("5", "2", "1", "3", "4"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Jon", "23", "TRUE"))
@@ -905,6 +959,7 @@ test_that("format_var data.frame sorting by multiple columns, one descending", {
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("2", "5", "4", "3", "1"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Bill", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Ben", "58", "TRUE"))
@@ -928,6 +983,7 @@ test_that("format_var data.frame sorting by multiple columns, both descending", 
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("4", "3", "1", "2", "5"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Ben", "58", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Maria", "32", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Jon", "23", "TRUE"))
@@ -952,6 +1008,7 @@ test_that("format_var data.frame sorting by index descending", {
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("5", "4", "3", "2", "1"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Tina", "26", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Ben", "58", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Maria", "32", "TRUE"))
@@ -979,6 +1036,7 @@ test_that("format_var data.frame sorting by string index descending", {
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("Row8", "Row6", "Row2", "Row10", "Row1"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Ben", "58", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Bill", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Tina", "26", "FALSE"))
@@ -1010,6 +1068,7 @@ test_that("format_var data.frame filtering search", {
     expect_equal(parsed_var$value$multi_value$row_count, 3)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "4"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Billy J", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Jen", "58", "TRUE"))
@@ -1039,6 +1098,7 @@ test_that("format_var data.frame filtering search multiple columns", {
     expect_equal(parsed_var$value$multi_value$row_count, 2)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("2", "4"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Billy J", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Jen", "4136", "TRUE"))
 })
@@ -1067,6 +1127,7 @@ test_that("format_var data.frame filtering min/max numeric", {
     expect_equal(parsed_var$value$multi_value$row_count, 3)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("2", "3", "5"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Billy J", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Maria", "416", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Tina", "26", "FALSE"))
@@ -1096,6 +1157,7 @@ test_that("format_var data.frame filtering min/max characters", {
     expect_equal(parsed_var$value$multi_value$row_count, 5)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "3", "4", "5"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Jon", "23", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Billy J", "41", "FALSE"))
     expect_equal(parsed_var$value$multi_value$data[[3]], c("Maria", "416", "TRUE"))
@@ -1128,6 +1190,7 @@ test_that("format_var data.frame filtering on separate columns with search and m
     expect_equal(parsed_var$value$multi_value$row_count, 2)
     expect_equal(parsed_var$value$multi_value$column_names, c("Name (character)", "Age (numeric)", "Employed (logical)"))
     expect_equal(parsed_var$value$multi_value$row_names, c("3", "5"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string", "number", "boolean"))
     expect_equal(parsed_var$value$multi_value$data[[1]], c("Maria", "416", "TRUE"))
     expect_equal(parsed_var$value$multi_value$data[[2]], c("Tina", "26", "FALSE"))
 })
@@ -1146,6 +1209,7 @@ test_that("format_var vector multi element", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:6)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("number"))
     expect_equal(parsed_var$value$multi_value$data, c("2", "3", "5", "1", "6", "7"))
 })
 
@@ -1162,6 +1226,7 @@ test_that("format_var vector sorting integers", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:6)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("number"))
     expect_equal(parsed_var$value$multi_value$data, c("1", "2", "3", "5", "6", "7"))
 })
 
@@ -1178,6 +1243,7 @@ test_that("format_var vector sorting strings", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:8)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("string"))
     expect_equal(parsed_var$value$multi_value$data, c("NA", "NA", "100", "11", "A", "aa", "cc", "Z"))
 })
 
@@ -1194,6 +1260,7 @@ test_that("format_var vector sorting strings descending", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:8)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("string"))
     expect_equal(parsed_var$value$multi_value$data, c("Z", "cc", "aa", "A", "11", "100", "NA", "NA"))
 })
 
@@ -1210,6 +1277,7 @@ test_that("format_var vector sorting abbreviated", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:4)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("string"))
     expect_equal(parsed_var$value$multi_value$data, c("100", "11", "A", "aa"))
 })
 
@@ -1226,6 +1294,7 @@ test_that("format_var vector sorting integers descending", {
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     row_names = as.character(1:6)
     expect_equal(parsed_var$value$multi_value$row_names, row_names)
+    expect_equal(parsed_var$value$multi_value$column_types, c("number"))
     expect_equal(parsed_var$value$multi_value$data, c("7", "6", "5", "3", "2", "1"))
 })
 
@@ -1249,6 +1318,7 @@ test_that("format_var vector search characters", {
     expect_equal(parsed_var$value$multi_value$row_count, 3)
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "3"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string"))
     expect_equal(parsed_var$value$multi_value$data, c("Bird", "abiRda", "100bird"))
 })
 
@@ -1274,6 +1344,7 @@ test_that("format_var vector search numeric abbreviated", {
     expect_equal(parsed_var$value$multi_value$row_count, 3)
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number"))
     expect_equal(parsed_var$value$multi_value$data, c("101", "100"))
 })
 
@@ -1297,6 +1368,7 @@ test_that("format_var vector min/max numeric", {
     expect_equal(parsed_var$value$multi_value$row_count, 3)
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("number"))
     expect_equal(parsed_var$value$multi_value$data, c("34", "100"))
 })
 
@@ -1320,6 +1392,7 @@ test_that("format_var vector min/max characters", {
     expect_equal(parsed_var$value$multi_value$row_count, 6)
     expect_equal(parsed_var$value$multi_value$column_names, c("vector1"))
     expect_equal(parsed_var$value$multi_value$row_names, c("1", "2", "3", "4", "5", "6"))
+    expect_equal(parsed_var$value$multi_value$column_types, c("string"))
     expect_equal(parsed_var$value$multi_value$data, c("cc", "Bird", "abiRda", "Z", "100bird", "11"))
 })
 
