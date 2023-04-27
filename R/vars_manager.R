@@ -273,7 +273,6 @@ get_matrix_var <- function(
 #' @importFrom dplyr arrange %>%
 #' @importFrom rlang parse_exprs
 #' @importFrom tibble rownames_to_column column_to_rownames
-#' @importFrom frictionless create_schema
 get_dataframe_var <- function(
     obj,
     name,
