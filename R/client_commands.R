@@ -32,7 +32,7 @@ open_settings <- function(page=NULL) {
         command <- paste(URL_SETTINGS, "/", page, sep="")
         send_url_command(command)
     } else {
-        stop("That is not a valid page")
+        stop(paste("'", page, "'", " is not a valid page", sep=""))
     }
 }
 

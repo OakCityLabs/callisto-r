@@ -61,11 +61,11 @@ test_that("settings command with specific page 'r'", {
 test_that("settings command with invalid page", {
     expect_error(
         open_settings("bad"),
-        "That is not a valid page"
+        "'bad' is not a valid page"
     )
     expect_error(
         open_settings("advance"),
-        "That is not a valid page"
+        "'advance' is not a valid page"
     )
 })
 
