@@ -341,6 +341,188 @@ test_that("format_var multi element named list long but not abbreviated", {
     expect_equal(parsed_var$value$multi_value$data, as.character(1:300))
 })
 
+test_that("format_var multi element named list multi-type", {
+    list1 <- list(name="bob", age=23, height=5.6, scores=c(90, 91, 87, 95))
+    vars <- format_var(environment(), "list1")
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "list1")
+    expect_equal(parsed_var$type, "list")
+    expect_equal(parsed_var$has_next_page, FALSE)
+    expect_equal(parsed_var$summary, "Length: 4")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 4)
+    expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
+    expect_equal(
+        parsed_var$value$multi_value$row_names,
+        c("name", "age", "height", "scores")
+    )
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
+    expect_equal(
+        parsed_var$value$multi_value$data,
+        c("bob", "23", "5.6", "c(90, 91, 87, 95)")
+    )
+})
+
+
+test_that("format_var multi element named list multi-type, search", {
+    list1 <- list(name="bob", age=23, height=5.6, scores=c(90, 91, 87, 95))
+
+    filters <- data.frame(
+        col = c("value"),
+        search = c("23"),
+        min = c(NA),
+        max = c(NA)
+    )
+
+    vars <- format_var(environment(), "list1", filters=filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "list1")
+    expect_equal(parsed_var$type, "list")
+    expect_equal(parsed_var$has_next_page, FALSE)
+    expect_equal(parsed_var$summary, "Length: 4")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 1)
+    expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
+    expect_equal(
+        parsed_var$value$multi_value$row_names,
+        c("age")
+    )
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
+    expect_equal(
+        parsed_var$value$multi_value$data,
+        c("23")
+    )
+})
+
+test_that("format_var multi element named list multi-type, with complex classes", {
+    setClass("student", slots=list(name="character", age="numeric", GPA="numeric"))
+    s1 <- new("student", name="John", age=21, GPA=3.5)
+    s2 <- new("student", name="Jules", age=24, GPA=3.9)
+    s3 <- new("student", name="Bob", age=22, GPA=4.0)
+    s4 <- new("student", name="Susie", age=25, GPA=3.4)
+    s5 <- new("student", name="Kat", age=28, GPA=4.0)
+    s6 <- new("student", name="Sally", age=24, GPA=3.9)
+    s7 <- new("student", name="Beth", age=22, GPA=3.8)
+
+    list1 <- list(
+        students=list(
+            "1"=s1,
+            "2"=s2,
+            "3"=s3,
+            "4"=s4,
+            "5"=s5,
+            "6"=s6,
+            "7"=s7
+        ),
+        number_students=7,
+        average_gpa=3.8,
+        student_names=c(
+            slot(s1, "name"),
+            slot(s2, "name"),
+            slot(s3, "name"),
+            slot(s4, "name"),
+            slot(s5, "name"),
+            slot(s6, "name"),
+            slot(s7, "name")
+        )
+    )
+
+    vars <- format_var(environment(), "list1")
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "list1")
+    expect_equal(parsed_var$type, "list")
+    expect_equal(parsed_var$has_next_page, FALSE)
+    expect_equal(parsed_var$summary, "Length: 4")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 4)
+    expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
+    expect_equal(
+        parsed_var$value$multi_value$row_names,
+        c("students", "number_students", "average_gpa", "student_names")
+    )
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
+    expect_equal(
+        parsed_var$value$multi_value$data[[1]],
+        "list(`1` = new(\"student\", name = \"John\", age = 21, GPA = 3.5), `2` = new(\"student\", name = \"Jules\", age = 24, GPA = 3.9), `3` = new(\"student\", name = \"Bob\", age = 22, GPA = 4), `4` = new(\"student\", name = \"Susie\", age = 25, GPA = 3.4), `5` = new(\"student\", name = \"Kat\", age = 28, GPA = 4), `6` = new(\"student\", name = \"Sally\", age = 24, GPA = 3.9), `7` = new(\"student\", name = \"Beth\", age = 22, GPA = 3.8))"
+    )
+    expect_equal(
+        parsed_var$value$multi_value$data[[2]],
+        "7"
+    )
+    expect_equal(
+        parsed_var$value$multi_value$data[[3]],
+        "3.8"
+    )
+    expect_equal(
+        parsed_var$value$multi_value$data[[4]],
+        "c(\"John\", \"Jules\", \"Bob\", \"Susie\", \"Kat\", \"Sally\", \"Beth\")"
+    )
+})
+
+test_that("format_var multi element named list multi-type, with complex classes, filter", {
+    setClass("student", slots=list(name="character", age="numeric", GPA="numeric"))
+    s1 <- new("student", name="John", age=21, GPA=3.5)
+    s2 <- new("student", name="Jules", age=24, GPA=3.9)
+    s3 <- new("student", name="Bob", age=22, GPA=4.0)
+    s4 <- new("student", name="Susie", age=25, GPA=3.4)
+    s5 <- new("student", name="Kat", age=28, GPA=4.0)
+    s6 <- new("student", name="Sally", age=24, GPA=3.9)
+    s7 <- new("student", name="Beth", age=22, GPA=3.8)
+
+    list1 <- list(
+        students=list(
+            "1"=s1,
+            "2"=s2,
+            "3"=s3,
+            "4"=s4,
+            "5"=s5,
+            "6"=s6,
+            "7"=s7
+        ),
+        number_students=7,
+        average_gpa=3.8,
+        student_names=c(
+            slot(s1, "name"),
+            slot(s2, "name"),
+            slot(s3, "name"),
+            slot(s4, "name"),
+            slot(s5, "name"),
+            slot(s6, "name"),
+            slot(s7, "name")
+        )
+    )
+
+    filters <- data.frame(
+        col = c("value"),
+        search = c("S"),
+        min = c(NA),
+        max = c(NA)
+    )
+
+    vars <- format_var(environment(), "list1", filters=filters)
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "list1")
+    expect_equal(parsed_var$type, "list")
+    expect_equal(parsed_var$has_next_page, FALSE)
+    expect_equal(parsed_var$summary, "Length: 4")
+    expect_equal(parsed_var$value$multi_value$column_count, 1)
+    expect_equal(parsed_var$value$multi_value$row_count, 2)
+    expect_equal(parsed_var$value$multi_value$column_names, c("list1"))
+    expect_equal(
+        parsed_var$value$multi_value$row_names,
+        c("students", "student_names")
+    )
+    expect_equal(parsed_var$value$multi_value$column_types, c("any"))
+    expect_equal(
+        parsed_var$value$multi_value$data[[1]],
+        "list(`1` = new(\"student\", name = \"John\", age = 21, GPA = 3.5), `2` = new(\"student\", name = \"Jules\", age = 24, GPA = 3.9), `3` = new(\"student\", name = \"Bob\", age = 22, GPA = 4), `4` = new(\"student\", name = \"Susie\", age = 25, GPA = 3.4), `5` = new(\"student\", name = \"Kat\", age = 28, GPA = 4), `6` = new(\"student\", name = \"Sally\", age = 24, GPA = 3.9), `7` = new(\"student\", name = \"Beth\", age = 22, GPA = 3.8))"
+    )
+    expect_equal(
+        parsed_var$value$multi_value$data[[2]],
+        "c(\"John\", \"Jules\", \"Bob\", \"Susie\", \"Kat\", \"Sally\", \"Beth\")"
+    )
+})
+
 test_that("format_var matrix long but not abbreviated", {
     matrix1 <- matrix(nrow=80, ncol=7)
     for (i in 1:80) {
@@ -1418,3 +1600,44 @@ test_that("create_exception_var returns formatted error", {
     expect_equal(length(error_var$value$multi_value$row_names) > 1, TRUE)
     expect_equal(length(error_var$value$multi_value$data) > 1, TRUE)
 })
+
+
+test_that("format_var with s4 class", {
+    setClass("student", slots=list(name="character", age="numeric", GPA="numeric"))
+    s <- new("student",name="John", age=21, GPA=3.5)
+
+    vars <- format_var(environment(), "s")
+    parsed_var = rjson::fromJSON(vars)
+    expect_equal(parsed_var$name, "s")
+    expect_equal(parsed_var$type, "student")
+    expect_equal(parsed_var$has_next_page, FALSE)
+    expect_equal(parsed_var$summary, "S4 class, instance of 'student'")
+    expect_equal(parsed_var$value$single_value, "S4 class, instance of 'student'")
+})
+
+
+
+test_that("format_var with reference class", {
+    zStudent <- setRefClass("zStudent",
+        fields = list(name = "character", age = "numeric", GPA = "numeric"),
+        methods = list(
+            inc_age = function(x) {
+                age <<- age + x
+            },
+            dec_age = function(x) {
+                age <<- age - x
+            }
+        )
+    )
+    z <- zStudent(name = "John", age = 21, GPA = 3.5)
+
+    vars <- format_var(environment(), "z")
+    parsed_var = rjson::fromJSON(vars)
+    print(parsed_var)
+    expect_equal(parsed_var$name, "z")
+    expect_equal(parsed_var$type, "zStudent")
+    expect_equal(parsed_var$has_next_page, FALSE)
+    expect_equal(parsed_var$summary, "Reference class, instance of 'zStudent'")
+    expect_equal(parsed_var$value$single_value, "Reference class, instance of 'zStudent'")
+})
+
