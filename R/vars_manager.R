@@ -610,7 +610,7 @@ get_var_details <- function(
     ))
 }
 
-create_exception_var <- function(e) {
+create_exception_var <- function(e, var_name) {
     stack <- sys.calls()
     row_names <- list()
     i <- 1
@@ -620,7 +620,7 @@ create_exception_var <- function(e) {
     }
     return(
         list(
-            name="Introspection Error",
+            name=sprintf("Failed to parse '%s'", var_name),
             type=toString(class(e)),
             summary=toString(e),
             abbreviated=FALSE,
@@ -668,7 +668,7 @@ format_vars <- function(envir, abbrev_len=DEFAULT_PAGE_SIZE, no_preview=FALSE) {
             var_details <- get_var_details(obj, name, page_size=abbrev_len, no_preview=no_preview)
             
         }, error=function(e) {
-            var_details <- create_exception_var(e)
+            var_details <- create_exception_var(e, name)
         })
         current_vars[[idx]] <- var_details
         idx <- idx + 1
@@ -715,7 +715,7 @@ format_var <- function(
             filters=filters
         )
     }, error=function(e) {
-        return(create_exception_var(e))
+        return(create_exception_var(e, name))
     })
     return(rjson::toJSON(`if`(is.null(err_resp), var_details, err_resp)))
 }

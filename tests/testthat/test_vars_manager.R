@@ -1589,8 +1589,8 @@ test_that("create_exception_var returns formatted error", {
     }, error=function(e) {
         return(e)
     })
-    error_var = create_exception_var(err_resp)
-    expect_equal(error_var$name, "Introspection Error")
+    error_var = create_exception_var(err_resp, "VariableName3")
+    expect_equal(error_var$name, "Failed to parse 'VariableName3'")
     expect_equal(error_var$type, "simpleError, error, condition")
     expect_equal(error_var$abbreviated, FALSE)
     expect_equal(error_var$summary, "Error in doTryCatch(return(expr), name, parentenv, handler): something exploded\n")
