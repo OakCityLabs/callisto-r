@@ -622,6 +622,7 @@ create_exception_var <- function(e, var_name) {
         list(
             name=sprintf("Failed to parse '%s'", var_name),
             type=toString(class(e)),
+            has_next_page=FALSE,
             summary=toString(e),
             abbreviated=FALSE,
             value=list(
