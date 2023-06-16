@@ -4,6 +4,8 @@ GB <- KB ** 3  # 1,073,741,824
 TB <- KB ** 4  # 1,099,511,627,776
 
 DEFAULT_PAGE_SIZE <- 50
+MAX_SINGLE_VALUE_LENGTH <- 500
+MAX_SUMMARY_LENGTH <- 140
 
 human_bytes <- function(B) {
     # Return the given bytes as a human friendly KB, MB, GB, or TB string
@@ -47,6 +49,22 @@ get_single_vector_var <- function(obj, name) {
         summary=as.character(obj),
         has_next_page=FALSE,
         value=list(single_value=as.character(obj))
+    ))
+}
+
+get_s4_var <- function(obj, name) {
+    return(list(
+        summary=sprintf("S4 class, instance of '%s'", class(obj)),
+        has_next_page=FALSE,
+        value=list(single_value=sprintf("S4 class, instance of '%s'", class(obj)))
+    ))
+}
+
+get_ref_class_var <- function(obj, name) {
+    return(list(
+        summary=sprintf("Reference class, instance of '%s'", class(obj)),
+        has_next_page=FALSE,
+        value=list(single_value=sprintf("Reference class, instance of '%s'", class(obj)))
     ))
 }
 
@@ -146,6 +164,84 @@ get_vector_var <- function(
         value=preview
     ))
 }
+
+get_list_var <- function(
+    obj,
+    name,
+    no_preview=FALSE,
+    page_size=DEFAULT_PAGE_SIZE,
+    page=0,
+    filters=NULL
+) {
+    # 'list' variables cannot be filtered, but not sorted
+    summary <- sprintf("Length: %d", length(obj))
+    has_next_page <- FALSE
+    preview <- NULL
+
+    if (!no_preview) {
+        obj_filtered <- obj
+        if (is.data.frame(filters) && length(filters) > 0) {
+            col_names <- colnames(filters)
+            if (
+                ("col" %in% col_names) &&
+                ("search" %in% col_names) &&
+                ("min" %in% col_names) &&
+                ("max" %in% col_names)
+            ) {
+                row1 <- filters[1,]
+                col_name <- row1$col[1]
+
+                if (is.character(col_name) && tolower(col_name) == "value") {
+                    search <- row1$search[1]
+                    min <- row1$min[1]
+                    max <- row1$max[1]
+                    obj_numeric <- is.numeric(obj)
+                    if (is.character(search)) {
+                        obj_filtered <- obj_filtered[grepl(search, obj_filtered, ignore.case=TRUE)]
+                    }
+                    if (is.numeric(min) && obj_numeric) {
+                        obj_filtered <- obj_filtered[obj_filtered >= min]
+                    }
+                    if (is.numeric(max) && obj_numeric) {
+                        obj_filtered <- obj_filtered[obj_filtered <= max]
+                    }
+                }
+            }
+        }
+
+        start <- `if`(!is.null(page_size), page_size * page + 1, 1)
+        has_next_page <- `if`(!is.null(page_size), length(obj_filtered) > (start + page_size - 1), FALSE)
+        end <- `if`(has_next_page, start + page_size - 1, length(obj_filtered))
+
+        
+        obj_pre <- obj_filtered[start:end]
+        data <- list()
+        row_names <- list()
+
+        for (i in 1:length(obj_pre)) {
+            data[[i]] = substr(as.character(obj_pre[i]), 1, MAX_SINGLE_VALUE_LENGTH)
+            if (is.null(names(obj_pre))) {
+                row_names[i] <- as.character(i + start - 1)
+            } else {
+                row_names[i] <- as.character(names(obj_pre))[i]
+            }
+        }
+
+        column_types = c(get_column_type(obj))
+
+        preview <- make_multi_dict(row_names, name, data, total_row_count=length(obj_filtered), column_types=column_types)
+    } else {
+        preview <- make_multi_dict(NULL, NULL, NULL, total_row_count=length(obj), total_column_count=1)
+    }
+    
+
+    return(list(
+        summary=summary,
+        has_next_page=has_next_page,
+        value=preview
+    ))
+}
+
 
 get_matrix_var <- function(
     obj,
@@ -478,18 +574,30 @@ get_var_details <- function(
             obj, name, no_preview, page_size, page, sort_by, ascending, filters
         )
     } else if (is.list(obj)) {
-        var_info <- get_vector_var(
-            obj, name, no_preview, page_size, page, sort_by, ascending, filters
+        var_info <- get_list_var(
+            obj, name, no_preview, page_size, page, filters
         )
     } else if (is.matrix(obj) && length(dim(obj)) == 2) {
         var_info <- get_matrix_var(
             obj, name, no_preview, page_size, page, sort_by, ascending, filters
         )
+    } else if (obj_type == 'S4' && !is(obj, "envRefClass")) {
+        var_info <- get_s4_var(obj, name)
+    } else if (obj_type == 'S4' && is(obj, "envRefClass")) {
+        var_info <- get_ref_class_var(obj, name)
     } else {
+        tryCatch({
+            summary <- noquote(toString(obj))
+        }, error=function(e) {
+            summary <- toString(obj_class)
+        })
+        if (no_preview && nchar(summary) > MAX_SINGLE_VALUE_LENGTH) {
+            summary <- substr(summary, 1, MAX_SINGLE_VALUE_LENGTH)
+        }
         var_info = list(
             has_next_page=FALSE,
-            summary=noquote(toString(obj)),
-            value=list(single_value=noquote(toString(obj)))
+            summary=summary,
+            value=list(single_value=summary) 
         )
     }
 
@@ -497,12 +605,12 @@ get_var_details <- function(
         name=name,
         type=toString(obj_class),
         has_next_page=var_info[["has_next_page"]],
-        summary=substr(var_info[["summary"]], 1, 140),  # limit summary length
+        summary=substr(var_info[["summary"]], 1, MAX_SUMMARY_LENGTH),  # limit summary length
         value=var_info[["value"]]
     ))
 }
 
-create_exception_var <- function(e) {
+create_exception_var <- function(e, var_name) {
     stack <- sys.calls()
     row_names <- list()
     i <- 1
@@ -512,8 +620,9 @@ create_exception_var <- function(e) {
     }
     return(
         list(
-            name="Introspection Error",
+            name=sprintf("Failed to parse '%s'", var_name),
             type=toString(class(e)),
+            has_next_page=FALSE,
             summary=toString(e),
             abbreviated=FALSE,
             value=list(
@@ -545,9 +654,9 @@ format_vars <- function(envir, abbrev_len=DEFAULT_PAGE_SIZE, no_preview=FALSE) {
     # (pass the output of `environment()` to this function)
     current_vars <- list()
 
-    err_resp <- tryCatch({
-        idx <- 1
-        for (name in ls(envir)) {
+    idx <- 1
+    for (name in ls(envir)) {
+        tryCatch({
             obj <- get(name, envir=envir)
             if (startsWith(name, "__")) {
                 next
@@ -558,14 +667,15 @@ format_vars <- function(envir, abbrev_len=DEFAULT_PAGE_SIZE, no_preview=FALSE) {
                 next
             }
             var_details <- get_var_details(obj, name, page_size=abbrev_len, no_preview=no_preview)
-
-            current_vars[[idx]] <- var_details
-            idx <- idx + 1
-        }
-    }, error=function(e) {
-        return(list(create_exception_var(e)))
-    })
-    return(rjson::toJSON(`if`(is.null(err_resp), current_vars, err_resp)))
+            
+        }, error=function(e) {
+            var_details <- create_exception_var(e, name)
+        })
+        current_vars[[idx]] <- var_details
+        idx <- idx + 1
+    }
+    
+    return(rjson::toJSON(current_vars))
 }
 
 #' Get string containing json representation of a single var in the provided environment
@@ -606,7 +716,7 @@ format_var <- function(
             filters=filters
         )
     }, error=function(e) {
-        return(create_exception_var(e))
+        return(create_exception_var(e, name))
     })
     return(rjson::toJSON(`if`(is.null(err_resp), var_details, err_resp)))
 }
