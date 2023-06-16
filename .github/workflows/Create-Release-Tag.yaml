@@ -1,0 +1,65 @@
+name: Create-Release-Tag
+
+on:
+  [workflow_call]
+
+jobs:
+  create-tag-master:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'master' }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: parse_version
+        run: |
+          VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2}')
+          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Echo tag
+        run: |
+          echo "Generated tag: ${{ steps.parse_version.outputs.TAG }}"
+
+      - uses: mukunku/tag-exists-action@v1.2.0
+        id: checkTag
+        with: 
+          tag: ${{ steps.parse_version.outputs.TAG }}
+      
+      - uses: rickstaa/action-create-tag@v1
+        if: steps.checkTag.outputs.exists == 'false'
+        id: "tag_create"
+        with:
+          tag: ${{ steps.parse_version.outputs.TAG }}
+          tag_exists_error: true
+          message: "Release ${{ steps.parse_version.outputs.TAG }}"
+  
+  create-tag-dev:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'dev' }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: parse_version
+        run: |
+          VERSION=$(awk '/Version/' DESCRIPTION | awk -F': ' '{print "v" $2 "-beta"}')
+          echo $VERSION
+          echo "TAG=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Echo tag
+        run: |
+          echo "Generated tag: ${{ steps.parse_version.outputs.TAG }}"
+
+      - uses: mukunku/tag-exists-action@v1.2.0
+        id: checkTag
+        with: 
+          tag: ${{ steps.parse_version.outputs.TAG }}
+      
+      - uses: rickstaa/action-create-tag@v1
+        if: steps.checkTag.outputs.exists == 'false'
+        id: "tag_create"
+        with:
+          tag: ${{ steps.parse_version.outputs.TAG }}
+          tag_exists_error: true
+          message: "Release ${{ steps.parse_version.outputs.TAG }}"
+
+
+

@@ -2,3 +2,11 @@
 
 export(format_var)
 export(format_vars)
+export(get_var_stats)
+export(send_notification)
+importFrom(dplyr,"%>%")
+importFrom(dplyr,arrange)
+importFrom(dplyr,recode)
+importFrom(rlang,parse_exprs)
+importFrom(tibble,column_to_rownames)
+importFrom(tibble,rownames_to_column)
