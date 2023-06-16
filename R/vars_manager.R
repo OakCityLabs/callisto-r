@@ -589,7 +589,7 @@ get_var_details <- function(
         tryCatch({
             summary <- noquote(toString(obj))
         }, error=function(e) {
-            sumary <- toString(obj_class)
+            summary <- toString(obj_class)
         })
         if (no_preview && nchar(summary) > MAX_SINGLE_VALUE_LENGTH) {
             summary <- substr(summary, 1, MAX_SINGLE_VALUE_LENGTH)
