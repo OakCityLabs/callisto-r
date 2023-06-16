@@ -219,7 +219,7 @@ get_list_var <- function(
         row_names <- list()
 
         for (i in 1:length(obj_pre)) {
-            data[[i]] = substr(as.character(obj_pre[i]), 1, MAX_SINGLE_VALUE_LENGTH)
+            data[[i]] = list(substr(as.character(obj_pre[i]), 1, MAX_SINGLE_VALUE_LENGTH))
             if (is.null(names(obj_pre))) {
                 row_names[i] <- as.character(i + start - 1)
             } else {
@@ -669,7 +669,7 @@ format_vars <- function(envir, abbrev_len=DEFAULT_PAGE_SIZE, no_preview=FALSE) {
             var_details <- get_var_details(obj, name, page_size=abbrev_len, no_preview=no_preview)
             
         }, error=function(e) {
-            var_details <- create_exception_var(e, name)
+            var_details <- list(create_exception_var(e, name))
         })
         current_vars[[idx]] <- var_details
         idx <- idx + 1
